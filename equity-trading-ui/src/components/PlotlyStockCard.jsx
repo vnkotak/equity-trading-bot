@@ -46,7 +46,7 @@ export default function PlotlyStockCard({ stock }) {
           onClick={() => setExpanded(!expanded)}
           className="text-indigo-600 text-sm font-medium hover:underline focus:outline-none"
         >
-          {expanded ? '▲ Hide Charts' : '▼ Show Charts'}
+          {expanded ? '▲' : '▼'}
         </button>
       </div>
 
