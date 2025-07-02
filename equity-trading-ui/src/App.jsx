@@ -48,7 +48,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 space-y-6">
+    <div className="min-h-screen bg-slate-50 p-6 space-y-6">
       <h1 className="text-4xl font-extrabold text-center text-indigo-700 drop-shadow-sm">
         📈 NSE Screener Dashboard
       </h1>
