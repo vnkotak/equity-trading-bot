@@ -48,108 +48,117 @@ export default function PlotlyStockCard({ stock }) {
         <div className="text-xl">{expanded ? '🔼' : '🔽'}</div>
       </div>
       {expanded && (
-        <div className="space-y-6 p-5 bg-white">
+        <div className="space-y-10 p-5 bg-white">
           <div className="text-sm text-gray-600 sm:hidden block text-center">
             ({buySignalCount} Buy, {sellSignalCount} Sell)
           </div>
 
-          <Plot
-            data={[
-              { x: dates, y: close, type: 'scatter', name: 'Close', line: { color: 'black' } },
-              { x: dates, y: ema, type: 'scatter', name: 'EMA 50', line: { color: 'orange' } },
-              {
-                x: dates,
-                y: triggers,
-                text: triggerText,
-                type: 'scatter',
-                mode: 'markers',
-                name: 'Buy Signal',
-                marker: { color: 'green', size: 10, symbol: 'triangle-up' },
-                hoverinfo: 'text',
-              },
-              {
-                x: dates,
-                y: sellTriggers,
-                text: sellTriggerText,
-                type: 'scatter',
-                mode: 'markers',
-                name: 'Sell Signal',
-                marker: { color: 'red', size: 10, symbol: 'triangle-down' },
-                hoverinfo: 'text',
-              },
-            ]}
-            layout={{
-              title: 'Close & EMA + Buy/Sell Signals',
-              height: 300,
-              autosize: true,
-              margin: { t: 30, r: 10, b: 40, l: 40 },
-              font: { family: 'Inter, sans-serif', size: 12 },
-              paper_bgcolor: 'white',
-              plot_bgcolor: 'white',
-            }}
-            useResizeHandler
-            style={{ width: '100%' }}
-          />
+          {/* Chart Block */}
+          <div className="rounded-lg border border-gray-200 p-4 shadow-sm">
+            <Plot
+              data={[
+                { x: dates, y: close, type: 'scatter', name: 'Close', line: { color: 'black' } },
+                { x: dates, y: ema, type: 'scatter', name: 'EMA 50', line: { color: 'orange' } },
+                {
+                  x: dates,
+                  y: triggers,
+                  text: triggerText,
+                  type: 'scatter',
+                  mode: 'markers',
+                  name: 'Buy Signal',
+                  marker: { color: 'green', size: 10, symbol: 'triangle-up' },
+                  hoverinfo: 'text',
+                },
+                {
+                  x: dates,
+                  y: sellTriggers,
+                  text: sellTriggerText,
+                  type: 'scatter',
+                  mode: 'markers',
+                  name: 'Sell Signal',
+                  marker: { color: 'red', size: 10, symbol: 'triangle-down' },
+                  hoverinfo: 'text',
+                },
+              ]}
+              layout={{
+                title: 'Close & EMA + Buy/Sell Signals',
+                height: 300,
+                autosize: true,
+                margin: { t: 30, r: 10, b: 40, l: 40 },
+                font: { family: 'Inter, sans-serif', size: 12 },
+                paper_bgcolor: 'white',
+                plot_bgcolor: 'white',
+              }}
+              useResizeHandler
+              style={{ width: '100%' }}
+            />
+          </div>
 
-          <Plot
-            data={[
-              { x: dates, y: rsi, type: 'scatter', name: 'RSI', line: { color: 'purple' } },
-              {
-                x: dates,
-                y: Array(dates.length).fill(55),
-                type: 'scatter',
-                name: 'Threshold 55',
-                line: { dash: 'dash', color: 'gray' },
-              },
-            ]}
-            layout={{
-              title: 'RSI',
-              height: 250,
-              autosize: true,
-              margin: { t: 30, r: 10, b: 40, l: 40 },
-              font: { family: 'Inter, sans-serif', size: 12 },
-              paper_bgcolor: 'white',
-              plot_bgcolor: 'white',
-            }}
-            useResizeHandler
-            style={{ width: '100%' }}
-          />
+          <div className="rounded-lg border border-gray-200 p-4 shadow-sm">
+            <Plot
+              data={[
+                { x: dates, y: rsi, type: 'scatter', name: 'RSI', line: { color: 'purple' } },
+                {
+                  x: dates,
+                  y: Array(dates.length).fill(55),
+                  type: 'scatter',
+                  name: 'Threshold 55',
+                  line: { dash: 'dash', color: 'gray' },
+                },
+              ]}
+              layout={{
+                title: 'RSI',
+                height: 250,
+                autosize: true,
+                margin: { t: 30, r: 10, b: 40, l: 40 },
+                font: { family: 'Inter, sans-serif', size: 12 },
+                paper_bgcolor: 'white',
+                plot_bgcolor: 'white',
+              }}
+              useResizeHandler
+              style={{ width: '100%' }}
+            />
+          </div>
 
-          <Plot
-            data={[
-              { x: dates, y: macd, type: 'scatter', name: 'MACD', line: { color: 'blue' } },
-              { x: dates, y: signal, type: 'scatter', name: 'Signal Line', line: { color: 'red' } },
-            ]}
-            layout={{
-              title: 'MACD & Signal',
-              height: 250,
-              autosize: true,
-              margin: { t: 30, r: 10, b: 40, l: 40 },
-              font: { family: 'Inter, sans-serif', size: 12 },
-              paper_bgcolor: 'white',
-              plot_bgcolor: 'white',
-            }}
-            useResizeHandler
-            style={{ width: '100%' }}
-          />
+          <div className="rounded-lg border border-gray-200 p-4 shadow-sm">
+            <Plot
+              data={[
+                { x: dates, y: macd, type: 'scatter', name: 'MACD', line: { color: 'blue' } },
+                { x: dates, y: signal, type: 'scatter', name: 'Signal Line', line: { color: 'red' } },
+              ]}
+              layout={{
+                title: 'MACD & Signal',
+                height: 250,
+                autosize: true,
+                margin: { t: 30, r: 10, b: 40, l: 40 },
+                font: { family: 'Inter, sans-serif', size: 12 },
+                paper_bgcolor: 'white',
+                plot_bgcolor: 'white',
+              }}
+              useResizeHandler
+              style={{ width: '100%' }}
+            />
+          </div>
 
-          <Plot
-            data={[
-              { x: dates, y: volume, type: 'bar', name: 'Volume', marker: { color: 'gray' } },
-              { x: dates, y: volumeAvg, type: 'scatter', name: '20-day Avg', line: { color: 'black' } },
-            ]}
-            layout={{
-              title: 'Volume & Avg',
-              height: 250,
-              autosize: true,
-              margin: { t: 30, r: 10, b: 40, l: 40 },
-              font: { family: 'Inter, sans-serif', size: 12 },
-              paper_bgcolor: 'white',
-              plot_bgcolor: 'white',
-            }}
-            useResizeHandler
-            style={{ width: '100%' }}
-          />
+          <div className="rounded-lg border border-gray-200 p-4 shadow-sm">
+            <Plot
+              data={[
+                { x: dates, y: volume, type: 'bar', name: 'Volume', marker: { color: 'gray' } },
+                { x: dates, y: volumeAvg, type: 'scatter', name: '20-day Avg', line: { color: 'black' } },
+              ]}
+              layout={{
+                title: 'Volume & Avg',
+                height: 250,
+                autosize: true,
+                margin: { t: 30, r: 10, b: 40, l: 40 },
+                font: { family: 'Inter, sans-serif', size: 12 },
+                paper_bgcolor: 'white',
+                plot_bgcolor: 'white',
+              }}
+              useResizeHandler
+              style={{ width: '100%' }}
+            />
+          </div>
         </div>
       )}
     </div>
