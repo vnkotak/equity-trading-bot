@@ -7,11 +7,6 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [currentTicker, setCurrentTicker] = useState('');
-  const [expandedCards, setExpandedCards] = useState({});
-
-  const toggleChart = (idx) => {
-    setExpandedCards((prev) => ({ ...prev, [idx]: !prev[idx] }));
-  };
 
   useEffect(() => {
     const fetchAllStocks = async () => {
@@ -83,27 +78,7 @@ export default function App() {
 
       <div className="space-y-6">
         {stocks.map((stock, idx) => (
-          <div key={idx} className="bg-white rounded-2xl shadow">
-            <div
-              className="flex items-center justify-between px-4 py-3 cursor-pointer"
-              onClick={() => toggleChart(idx)}
-            >
-              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3">
-                <h2 className="text-xl font-semibold text-indigo-700">{stock.ticker}</h2>
-                <span className="text-sm text-gray-600 sm:mt-0 mt-1">
-                  ({stock.buy_signals || 0} Buy, {stock.sell_signals || 0} Sell)
-                </span>
-              </div>
-              <span className="text-2xl">
-                {expandedCards[idx] ? '▲' : '▼'}
-              </span>
-            </div>
-            {expandedCards[idx] && (
-              <div className="px-4 pb-4">
-                <PlotlyStockCard stock={stock} />
-              </div>
-            )}
-          </div>
+          <PlotlyStockCard key={idx} stock={stock} />
         ))}
       </div>
     </div>
