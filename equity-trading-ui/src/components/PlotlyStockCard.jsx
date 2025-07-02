@@ -34,14 +34,14 @@ export default function PlotlyStockCard({ stock }) {
   const sellSignalCount = stock.history.filter((d) => d.sell_trigger).length;
 
   return (
-    <div className="bg-white rounded-2xl shadow-md border border-indigo-100 overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-300 overflow-hidden">
       <div
-        className="flex items-center justify-between px-4 py-3 cursor-pointer bg-indigo-50 hover:bg-indigo-100 transition"
+        className="flex items-center justify-between px-4 py-3 cursor-pointer bg-gradient-to-r from-indigo-500 to-indigo-700 text-white hover:from-indigo-600 hover:to-indigo-800 transition"
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3">
-          <h2 className="text-lg font-semibold text-indigo-700">{stock.ticker}</h2>
-          <span className="text-sm text-gray-600 sm:inline hidden">
+          <h2 className="text-lg font-semibold">{stock.ticker}</h2>
+          <span className="text-sm sm:inline hidden text-white/80">
             ({buySignalCount} Buy, {sellSignalCount} Sell)
           </span>
         </div>
