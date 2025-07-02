@@ -6,23 +6,19 @@ export default function App() {
   const [progress, setProgress] = useState(0);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
-  const [processedCount, setProcessedCount] = useState(0);
   const [currentTicker, setCurrentTicker] = useState('');
 
   useEffect(() => {
     const fetchAllStocks = async () => {
       try {
-        // Step 1: Get the list of tickers
         const metaRes = await fetch('https://fastapi-trading-bot-1.onrender.com/screener-meta');
         const metaData = await metaRes.json();
         const tickers = metaData.tickers || [];
         setTotal(tickers.length);
 
-        // Step 2: Fetch each stock one by one
         for (let i = 0; i < tickers.length; i++) {
           const ticker = tickers[i];
           setCurrentTicker(ticker);
-          setProcessedCount(i + 1);
 
           try {
             const stockRes = await fetch(`https://fastapi-trading-bot-1.onrender.com/screener-stock?ticker=${ticker}`);
@@ -31,12 +27,9 @@ export default function App() {
               stockData &&
               stockData.history &&
               stockData.history.length > 0 &&
-              stockData.match_type === "full"
+              stockData.match_type === 'full'
             ) {
               setStocks((prev) => [...prev, stockData]);
-              console.log(`✅ Full Match: ${ticker}`);
-            } else {
-              console.log(`⏭️ Skipping: ${ticker}`);
             }
           } catch (err) {
             console.warn(`⚠️ Failed to fetch ${ticker}`);
@@ -55,34 +48,39 @@ export default function App() {
   }, []);
 
   return (
-    <div className="p-4 space-y-4 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold text-center">📊 NSE Screener Dashboard</h1>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-slate-100 p-6 space-y-6">
+      <h1 className="text-4xl font-extrabold text-center text-indigo-700 drop-shadow-sm">
+        📈 NSE Screener Dashboard
+      </h1>
 
       {loading && (
-        <div className="text-center">
-          <p className="mb-2 font-medium text-blue-700">
-            🔄 Processing: {currentTicker || '...'}
+        <div className="text-center space-y-3 animate-fade-in">
+          <p className="text-lg font-medium text-gray-700">
+            Scanning {currentTicker || 'stocks'}... {progress}%
           </p>
-          <p className="mb-2">Progress: {progress}% ({processedCount} of {total})</p>
-          <div className="w-full bg-gray-200 rounded-full h-3">
+          <div className="w-full bg-gray-300 rounded-full h-4 overflow-hidden shadow-inner">
             <div
-              className="bg-blue-500 h-3 rounded-full transition-all duration-300"
+              className="bg-gradient-to-r from-green-400 via-blue-500 to-purple-500 h-4 rounded-full transition-all duration-300 ease-in-out"
               style={{ width: `${progress}%` }}
             ></div>
           </div>
-          <p className="text-sm text-green-700 mt-1">
-            ✅ Number of stocks matched: {stocks.length}
+          <p className="text-sm text-gray-600">
+            Number of stocks matched: {stocks.length} / {total}
           </p>
         </div>
       )}
 
       {!loading && stocks.length === 0 && (
-        <p className="text-center text-red-500">No stocks found matching criteria.</p>
+        <p className="text-center text-red-600 font-semibold text-lg">
+          🚫 No stocks found matching criteria.
+        </p>
       )}
 
-      {stocks.map((stock, idx) => (
-        <PlotlyStockCard key={idx} stock={stock} />
-      ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {stocks.map((stock, idx) => (
+          <PlotlyStockCard key={idx} stock={stock} />
+        ))}
+      </div>
     </div>
   );
 }
