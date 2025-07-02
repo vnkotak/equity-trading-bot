@@ -17,7 +17,6 @@ export default function PlotlyStockCard({ stock }) {
   const volume = stock.history.map((d) => d.volume);
   const volumeAvg = stock.history.map((d) => d.volumeAvg);
 
-  // Buy Signal
   const triggers = stock.history.map((d) => d.signal_trigger ? d.close : null);
   const triggerText = stock.history.map((d) =>
     d.signal_trigger
@@ -26,7 +25,6 @@ export default function PlotlyStockCard({ stock }) {
   );
   const buySignalCount = stock.history.filter((d) => d.signal_trigger).length;
 
-  // Sell Signal
   const sellTriggers = stock.history.map((d) => d.sell_trigger ? d.close : null);
   const sellTriggerText = stock.history.map((d) =>
     d.sell_trigger
@@ -36,22 +34,24 @@ export default function PlotlyStockCard({ stock }) {
   const sellSignalCount = stock.history.filter((d) => d.sell_trigger).length;
 
   return (
-    <div className="bg-white p-4 rounded-2xl shadow space-y-2 w-full mb-6">
+    <div className="bg-white rounded-2xl shadow-lg p-5 transition-all duration-300 border border-gray-200">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-blue-700">
-          {stock.ticker} ({buySignalCount} Buy{buySignalCount !== 1 ? 's' : ''}, {sellSignalCount} Sell{sellSignalCount !== 1 ? 's' : ''})
+        <h2 className="text-lg font-semibold text-indigo-700">
+          {stock.ticker}
+          <span className="ml-2 text-sm text-gray-500">
+            ({buySignalCount} Buy, {sellSignalCount} Sell)
+          </span>
         </h2>
         <button
-          onClick={() => setExpanded((prev) => !prev)}
-          className="text-sm text-blue-600 underline"
+          onClick={() => setExpanded(!expanded)}
+          className="text-indigo-600 text-sm font-medium hover:underline focus:outline-none"
         >
-          {expanded ? 'Hide Charts' : 'Show Charts'}
+          {expanded ? '▲ Hide Charts' : '▼ Show Charts'}
         </button>
       </div>
 
       {expanded && (
-        <div className="space-y-4 mt-2">
-          {/* Close + EMA + Buy/Sell Signal */}
+        <div className="space-y-5 mt-4">
           <Plot
             data={[
               { x: dates, y: close, type: 'scatter', name: 'Close', line: { color: 'black' } },
@@ -82,12 +82,12 @@ export default function PlotlyStockCard({ stock }) {
               height: 300,
               autosize: true,
               margin: { t: 30, r: 10, b: 40, l: 40 },
+              font: { family: 'Inter, sans-serif', size: 12 },
             }}
             useResizeHandler
             style={{ width: '100%' }}
           />
 
-          {/* RSI */}
           <Plot
             data={[
               { x: dates, y: rsi, type: 'scatter', name: 'RSI', line: { color: 'purple' } },
@@ -104,12 +104,12 @@ export default function PlotlyStockCard({ stock }) {
               height: 250,
               autosize: true,
               margin: { t: 30, r: 10, b: 40, l: 40 },
+              font: { family: 'Inter, sans-serif', size: 12 },
             }}
             useResizeHandler
             style={{ width: '100%' }}
           />
 
-          {/* MACD */}
           <Plot
             data={[
               { x: dates, y: macd, type: 'scatter', name: 'MACD', line: { color: 'blue' } },
@@ -120,12 +120,12 @@ export default function PlotlyStockCard({ stock }) {
               height: 250,
               autosize: true,
               margin: { t: 30, r: 10, b: 40, l: 40 },
+              font: { family: 'Inter, sans-serif', size: 12 },
             }}
             useResizeHandler
             style={{ width: '100%' }}
           />
 
-          {/* Volume */}
           <Plot
             data={[
               { x: dates, y: volume, type: 'bar', name: 'Volume', marker: { color: 'gray' } },
@@ -136,6 +136,7 @@ export default function PlotlyStockCard({ stock }) {
               height: 250,
               autosize: true,
               margin: { t: 30, r: 10, b: 40, l: 40 },
+              font: { family: 'Inter, sans-serif', size: 12 },
             }}
             useResizeHandler
             style={{ width: '100%' }}
