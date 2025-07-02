@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import PlotlyStockCard from './PlotlyStockCard';
+import PlotlyStockCard from './components/PlotlyStockCard';
 
 export default function App() {
   const [stocks, setStocks] = useState([]);
