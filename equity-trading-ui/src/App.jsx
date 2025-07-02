@@ -11,8 +11,11 @@ export default function App() {
     const fetchAllStocks = async () => {
       try {
         // Step 1: Get the list of tickers
+        console.log('Step 1');
         const metaRes = await fetch('/screener-meta');
+        console.log('Step 2');
         const metaData = await metaRes.json();
+        console.log(`📤 Requesting ${metaData}`);
         const tickers = metaData.tickers || [];
         setTotal(tickers.length);
 
