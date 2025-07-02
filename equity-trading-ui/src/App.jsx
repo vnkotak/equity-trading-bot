@@ -11,11 +11,8 @@ export default function App() {
     const fetchAllStocks = async () => {
       try {
         // Step 1: Get the list of tickers
-        console.log('Step 1');
         const metaRes = await fetch('https://fastapi-trading-bot-1.onrender.com/screener-meta');
-        console.log('Step 2');
         const metaData = await metaRes.json();
-        console.log(`📤 Requesting ${metaData}`);
         const tickers = metaData.tickers || [];
         setTotal(tickers.length);
 
@@ -27,7 +24,12 @@ export default function App() {
           try {
             const stockRes = await fetch(`https://fastapi-trading-bot-1.onrender.com/screener-stock?ticker=${ticker}`);
             const stockData = await stockRes.json();
-            if (stockData && stockData.history && stockData.history.length > 0) {
+            if (
+                stockData &&
+                stockData.history &&
+                stockData.history.length > 0 &&
+                stockData.history[stockData.history.length - 1].signal_trigger === true
+              ) {
               results.push(stockData);
               setStocks((prev) => [...prev, stockData]);
             }
