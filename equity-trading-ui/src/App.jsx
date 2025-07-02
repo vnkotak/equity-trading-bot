@@ -83,20 +83,26 @@ export default function App() {
 
       <div className="space-y-6">
         {stocks.map((stock, idx) => (
-          <div key={idx} className="bg-white rounded-2xl shadow p-4">
+          <div key={idx} className="bg-white rounded-2xl shadow">
             <div
-              className="flex flex-col sm:flex-row sm:justify-between sm:items-center cursor-pointer"
+              className="flex items-center justify-between px-4 py-3 cursor-pointer"
               onClick={() => toggleChart(idx)}
             >
-              <h2 className="text-xl font-semibold text-indigo-700">{stock.ticker}</h2>
-              <span className="text-sm text-gray-600 sm:order-none order-2 mt-1 sm:mt-0">
-                ({stock.buy_signals || 0} Buy, {stock.sell_signals || 0} Sell)
-              </span>
-              <span className="text-2xl sm:ml-2 sm:mt-0 mt-2">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3">
+                <h2 className="text-xl font-semibold text-indigo-700">{stock.ticker}</h2>
+                <span className="text-sm text-gray-600 sm:mt-0 mt-1">
+                  ({stock.buy_signals || 0} Buy, {stock.sell_signals || 0} Sell)
+                </span>
+              </div>
+              <span className="text-2xl">
                 {expandedCards[idx] ? '▲' : '▼'}
               </span>
             </div>
-            {expandedCards[idx] && <PlotlyStockCard stock={stock} />}
+            {expandedCards[idx] && (
+              <div className="px-4 pb-4">
+                <PlotlyStockCard stock={stock} />
+              </div>
+            )}
           </div>
         ))}
       </div>
