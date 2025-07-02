@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import PlotlyStockCard from './components/PlotlyStockCard';
-import { ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function App() {
   const [stocks, setStocks] = useState([]);
@@ -85,9 +84,17 @@ export default function App() {
       <div className="space-y-6">
         {stocks.map((stock, idx) => (
           <div key={idx} className="bg-white rounded-2xl shadow p-4">
-            <div className="flex justify-between items-center cursor-pointer" onClick={() => toggleChart(idx)}>
+            <div
+              className="flex flex-col sm:flex-row sm:justify-between sm:items-center cursor-pointer"
+              onClick={() => toggleChart(idx)}
+            >
               <h2 className="text-xl font-semibold text-indigo-700">{stock.ticker}</h2>
-              {expandedCards[idx] ? <ChevronUp className="text-indigo-600" /> : <ChevronDown className="text-indigo-600" />}
+              <span className="text-sm text-gray-600 sm:order-none order-2 mt-1 sm:mt-0">
+                ({stock.buy_signals || 0} Buy, {stock.sell_signals || 0} Sell)
+              </span>
+              <span className="text-2xl sm:ml-2 sm:mt-0 mt-2">
+                {expandedCards[idx] ? '▲' : '▼'}
+              </span>
             </div>
             {expandedCards[idx] && <PlotlyStockCard stock={stock} />}
           </div>
