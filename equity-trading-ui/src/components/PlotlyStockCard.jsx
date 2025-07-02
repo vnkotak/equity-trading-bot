@@ -54,7 +54,7 @@ export default function PlotlyStockCard({ stock }) {
           </div>
 
           <Plot
-            data=[
+            data={[
               { x: dates, y: close, type: 'scatter', name: 'Close', line: { color: 'black' } },
               { x: dates, y: ema, type: 'scatter', name: 'EMA 50', line: { color: 'orange' } },
               {
@@ -77,7 +77,7 @@ export default function PlotlyStockCard({ stock }) {
                 marker: { color: 'red', size: 10, symbol: 'triangle-down' },
                 hoverinfo: 'text',
               },
-            ]
+            ]}
             layout={{
               title: 'Close & EMA + Buy/Sell Signals',
               height: 300,
@@ -92,7 +92,7 @@ export default function PlotlyStockCard({ stock }) {
           />
 
           <Plot
-            data=[
+            data={[
               { x: dates, y: rsi, type: 'scatter', name: 'RSI', line: { color: 'purple' } },
               {
                 x: dates,
@@ -101,7 +101,7 @@ export default function PlotlyStockCard({ stock }) {
                 name: 'Threshold 55',
                 line: { dash: 'dash', color: 'gray' },
               },
-            ]
+            ]}
             layout={{
               title: 'RSI',
               height: 250,
@@ -116,10 +116,10 @@ export default function PlotlyStockCard({ stock }) {
           />
 
           <Plot
-            data=[
+            data={[
               { x: dates, y: macd, type: 'scatter', name: 'MACD', line: { color: 'blue' } },
               { x: dates, y: signal, type: 'scatter', name: 'Signal Line', line: { color: 'red' } },
-            ]
+            ]}
             layout={{
               title: 'MACD & Signal',
               height: 250,
@@ -134,10 +134,10 @@ export default function PlotlyStockCard({ stock }) {
           />
 
           <Plot
-            data=[
+            data={[
               { x: dates, y: volume, type: 'bar', name: 'Volume', marker: { color: 'gray' } },
               { x: dates, y: volumeAvg, type: 'scatter', name: '20-day Avg', line: { color: 'black' } },
-            ]
+            ]}
             layout={{
               title: 'Volume & Avg',
               height: 250,
