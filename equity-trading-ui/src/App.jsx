@@ -28,7 +28,7 @@ export default function App() {
                 stockData &&
                 stockData.history &&
                 stockData.history.length > 0 &&
-                stockData.history[stockData.history.length - 1].signal_trigger === true
+                stockData.match_type === "full"
               ) {
               results.push(stockData);
               setStocks((prev) => [...prev, stockData]);
