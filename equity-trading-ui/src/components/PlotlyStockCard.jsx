@@ -34,24 +34,25 @@ export default function PlotlyStockCard({ stock }) {
   const sellSignalCount = stock.history.filter((d) => d.sell_trigger).length;
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-5 transition-all duration-300 border border-gray-200">
-      <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-indigo-700">
-          {stock.ticker}
-          <span className="ml-2 text-sm text-gray-500">
+    <div className="bg-white rounded-2xl shadow-md border border-indigo-100 overflow-hidden">
+      <div
+        className="flex items-center justify-between px-4 py-3 cursor-pointer bg-indigo-50 hover:bg-indigo-100 transition"
+        onClick={() => setExpanded(!expanded)}
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3">
+          <h2 className="text-lg font-semibold text-indigo-700">{stock.ticker}</h2>
+          <span className="text-sm text-gray-600 sm:inline hidden">
             ({buySignalCount} Buy, {sellSignalCount} Sell)
           </span>
-        </h2>
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="text-indigo-600 text-sm font-medium hover:underline focus:outline-none"
-        >
-          {expanded ? '▲' : '▼'}
-        </button>
+        </div>
+        <div className="text-xl">{expanded ? '🔼' : '🔽'}</div>
       </div>
-
       {expanded && (
-        <div className="space-y-5 mt-4">
+        <div className="space-y-6 p-4 bg-white">
+          <div className="text-sm text-gray-600 sm:hidden block text-center">
+            ({buySignalCount} Buy, {sellSignalCount} Sell)
+          </div>
+
           <Plot
             data={[
               { x: dates, y: close, type: 'scatter', name: 'Close', line: { color: 'black' } },
