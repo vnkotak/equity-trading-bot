@@ -34,13 +34,13 @@ export default function PlotlyStockCard({ stock }) {
   const sellSignalCount = stock.history.filter((d) => d.sell_trigger).length;
 
   return (
-    <div className="bg-gray-50 rounded-2xl shadow-lg border border-gray-300 overflow-hidden">
+    <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
       <div
-        className="flex items-center justify-between px-4 py-3 cursor-pointer bg-gradient-to-r from-blue-50 to-blue-100 text-gray-800 hover:from-blue-100 hover:to-blue-200 transition"
+        className="flex items-center justify-between px-5 py-4 cursor-pointer bg-gradient-to-r from-sky-100 to-blue-50 text-gray-900 hover:from-blue-100 hover:to-sky-100 transition"
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3">
-          <h2 className="text-lg font-semibold">{stock.ticker}</h2>
+          <h2 className="text-lg font-bold tracking-wide text-blue-800">{stock.ticker}</h2>
           <span className="text-sm sm:inline hidden text-gray-700">
             ({buySignalCount} Buy, {sellSignalCount} Sell)
           </span>
@@ -48,13 +48,13 @@ export default function PlotlyStockCard({ stock }) {
         <div className="text-xl">{expanded ? '🔼' : '🔽'}</div>
       </div>
       {expanded && (
-        <div className="space-y-6 p-4 bg-white">
+        <div className="space-y-6 p-5 bg-white">
           <div className="text-sm text-gray-600 sm:hidden block text-center">
             ({buySignalCount} Buy, {sellSignalCount} Sell)
           </div>
 
           <Plot
-            data={[
+            data=[
               { x: dates, y: close, type: 'scatter', name: 'Close', line: { color: 'black' } },
               { x: dates, y: ema, type: 'scatter', name: 'EMA 50', line: { color: 'orange' } },
               {
@@ -77,20 +77,22 @@ export default function PlotlyStockCard({ stock }) {
                 marker: { color: 'red', size: 10, symbol: 'triangle-down' },
                 hoverinfo: 'text',
               },
-            ]}
+            ]
             layout={{
               title: 'Close & EMA + Buy/Sell Signals',
               height: 300,
               autosize: true,
               margin: { t: 30, r: 10, b: 40, l: 40 },
               font: { family: 'Inter, sans-serif', size: 12 },
+              paper_bgcolor: 'white',
+              plot_bgcolor: 'white',
             }}
             useResizeHandler
             style={{ width: '100%' }}
           />
 
           <Plot
-            data={[
+            data=[
               { x: dates, y: rsi, type: 'scatter', name: 'RSI', line: { color: 'purple' } },
               {
                 x: dates,
@@ -99,45 +101,51 @@ export default function PlotlyStockCard({ stock }) {
                 name: 'Threshold 55',
                 line: { dash: 'dash', color: 'gray' },
               },
-            ]}
+            ]
             layout={{
               title: 'RSI',
               height: 250,
               autosize: true,
               margin: { t: 30, r: 10, b: 40, l: 40 },
               font: { family: 'Inter, sans-serif', size: 12 },
+              paper_bgcolor: 'white',
+              plot_bgcolor: 'white',
             }}
             useResizeHandler
             style={{ width: '100%' }}
           />
 
           <Plot
-            data={[
+            data=[
               { x: dates, y: macd, type: 'scatter', name: 'MACD', line: { color: 'blue' } },
               { x: dates, y: signal, type: 'scatter', name: 'Signal Line', line: { color: 'red' } },
-            ]}
+            ]
             layout={{
               title: 'MACD & Signal',
               height: 250,
               autosize: true,
               margin: { t: 30, r: 10, b: 40, l: 40 },
               font: { family: 'Inter, sans-serif', size: 12 },
+              paper_bgcolor: 'white',
+              plot_bgcolor: 'white',
             }}
             useResizeHandler
             style={{ width: '100%' }}
           />
 
           <Plot
-            data={[
+            data=[
               { x: dates, y: volume, type: 'bar', name: 'Volume', marker: { color: 'gray' } },
               { x: dates, y: volumeAvg, type: 'scatter', name: '20-day Avg', line: { color: 'black' } },
-            ]}
+            ]
             layout={{
               title: 'Volume & Avg',
               height: 250,
               autosize: true,
               margin: { t: 30, r: 10, b: 40, l: 40 },
               font: { family: 'Inter, sans-serif', size: 12 },
+              paper_bgcolor: 'white',
+              plot_bgcolor: 'white',
             }}
             useResizeHandler
             style={{ width: '100%' }}
