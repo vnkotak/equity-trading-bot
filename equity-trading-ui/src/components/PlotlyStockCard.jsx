@@ -36,12 +36,12 @@ export default function PlotlyStockCard({ stock }) {
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-gray-300 overflow-hidden">
       <div
-        className="flex items-center justify-between px-4 py-3 cursor-pointer bg-gradient-to-r from-indigo-500 to-indigo-700 text-white hover:from-indigo-600 hover:to-indigo-800 transition"
+        className="flex items-center justify-between px-4 py-3 cursor-pointer bg-gradient-to-r from-blue-100 to-blue-200 text-gray-800 hover:from-blue-200 hover:to-blue-300 transition"
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3">
           <h2 className="text-lg font-semibold">{stock.ticker}</h2>
-          <span className="text-sm sm:inline hidden text-white/80">
+          <span className="text-sm sm:inline hidden text-gray-700">
             ({buySignalCount} Buy, {sellSignalCount} Sell)
           </span>
         </div>
