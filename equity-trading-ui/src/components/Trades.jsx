@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
 export default function Trades() {
   const [trades, setTrades] = useState([]);
@@ -60,7 +61,7 @@ export default function Trades() {
             <p className={`text-lg font-bold ${
               key.includes('profit') ? (summary && summary[key] >= 0 ? 'text-green-600' : 'text-red-600') : 'text-blue-800'
             }`}>
-              {loading ? <BouncingDots /> : key.includes('pct') ? `${summary?.[key]?.toFixed(2)}%` : `₹${summary?.[key]?.toFixed(2)}`}
+              {loading ? <Loader2 className="animate-spin w-5 h-5 mx-auto" /> : key.includes('pct') ? `${summary?.[key]?.toFixed(2)}%` : `₹${summary?.[key]?.toFixed(2)}`}
             </p>
           </div>
         ))}
@@ -96,7 +97,7 @@ export default function Trades() {
 
       {/* Trades Table */}
       {loading ? (
-        <div className="flex justify-center items-center py-6">
+        <div className="flex justify-center items-center py-6 min-h-[150px]">
           <BouncingDots />
         </div>
       ) : trades.length === 0 ? (
@@ -142,19 +143,18 @@ function MetricCard({ title, value, loading }) {
     <div className="text-center">
       <p className="text-gray-500 text-sm">{title}</p>
       <p className="text-lg font-bold text-indigo-700">
-        {loading ? <BouncingDots /> : value}
+        {loading ? <Loader2 className="animate-spin w-5 h-5 mx-auto" /> : value}
       </p>
     </div>
   );
 }
 
-// 🟣 Bouncing Dots Animation
 function BouncingDots() {
   return (
-    <div className="flex justify-center space-x-1">
-      <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-      <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-      <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce"></div>
+    <div className="flex justify-center items-center h-5 space-x-1">
+      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
+      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
+      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" />
     </div>
   );
 }
