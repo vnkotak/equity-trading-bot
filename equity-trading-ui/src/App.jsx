@@ -10,35 +10,41 @@ export default function App() {
   const [total, setTotal] = useState(0);
   const [currentTicker, setCurrentTicker] = useState('');
 
-  useEffect(() => {
-    if (view !== 'screener') return;
-
+useEffect(() => {
+    // Only fetch once if already fetched
+    if (stocks.length > 0 || view !== 'screener') return;
+  
     const fetchAllStocks = async () => {
       try {
         const metaRes = await fetch('https://fastapi-trading-bot-1.onrender.com/screener-meta');
         const metaData = await metaRes.json();
         const tickers = metaData.tickers || [];
         setTotal(tickers.length);
-
+  
         for (let i = 0; i < tickers.length; i++) {
           const ticker = tickers[i];
           setCurrentTicker(ticker);
-
+  
           try {
             const stockRes = await fetch(`https://fastapi-trading-bot-1.onrender.com/screener-stock?ticker=${ticker}`);
             const stockData = await stockRes.json();
+  
             if (
               stockData &&
               stockData.history &&
               stockData.history.length > 0 &&
               stockData.match_type === 'full'
             ) {
-              setStocks((prev) => [...prev, stockData]);
+              setStocks((prev) => {
+                // Prevent duplicates
+                if (prev.find((s) => s.ticker === stockData.ticker)) return prev;
+                return [...prev, stockData];
+              });
             }
           } catch (err) {
             console.warn(`⚠️ Failed to fetch ${ticker}`);
           }
-
+  
           setProgress(Math.round(((i + 1) / tickers.length) * 100));
         }
       } catch (err) {
@@ -47,9 +53,9 @@ export default function App() {
         setLoading(false);
       }
     };
-
+  
     fetchAllStocks();
-  }, [view]);
+  }, []); // ← empty dependency = only runs once on mount
 
   return (
     <div className="min-h-screen bg-slate-50 p-6 space-y-6">
