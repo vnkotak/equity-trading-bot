@@ -12,12 +12,9 @@ export default function App() {
   const [currentTicker, setCurrentTicker] = useState('');
 
   const fetchAllStocks = async () => {
+    setLoading(true);
+    setStocks([]);
     try {
-      setStocks([]);
-      setProgress(0);
-      setCurrentTicker('');
-      setLoading(true);
-
       const metaRes = await fetch('https://fastapi-trading-bot-1.onrender.com/screener-meta');
       const metaData = await metaRes.json();
       const tickers = metaData.tickers || [];
@@ -58,10 +55,10 @@ export default function App() {
   useEffect(() => {
     if (stocks.length > 0 || view !== 'screener') return;
     fetchAllStocks();
-  }, []);
+  }, []); // only run on initial mount
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 space-y-6 font-sans">
+    <div className="min-h-screen bg-slate-50 p-6 space-y-6 relative">
       <h1 className="text-4xl font-extrabold text-center text-indigo-700 drop-shadow-sm">
         📈 NSE Equity Dashboard
       </h1>
@@ -69,6 +66,7 @@ export default function App() {
       {/* Fancy Toggle Button */}
       <div className="relative w-full max-w-xs mx-auto mt-4">
         <div className="grid grid-cols-2 bg-gray-200 rounded-full shadow-inner p-1 relative">
+          {/* Sliding Highlight */}
           <span
             className={`absolute inset-y-1 transition-all duration-300 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500`}
             style={{
@@ -94,18 +92,6 @@ export default function App() {
       {/* Screener Section */}
       {view === 'screener' && (
         <>
-          {/* Refresh Button */}
-          <div className="flex justify-end -mb-2">
-            <button
-              onClick={fetchAllStocks}
-              className="flex items-center gap-1 text-sm px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full shadow hover:bg-indigo-200 transition"
-              title="Refresh Screener"
-            >
-              <RotateCw className="w-4 h-4" />
-              Refresh
-            </button>
-          </div>
-
           {loading && (
             <div className="text-center space-y-3 animate-fade-in">
               <p className="text-lg font-medium text-gray-700">
@@ -134,11 +120,17 @@ export default function App() {
               <PlotlyStockCard key={idx} stock={stock} />
             ))}
           </div>
+
+          {/* Floating Refresh Button */}
+          <button
+            onClick={fetchAllStocks}
+            className="fixed bottom-6 right-6 bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-lg transition-all duration-200 hover:scale-110 active:scale-95"
+            title="Rescan Screener"
+          >
+            <RotateCw className="w-5 h-5" />
+          </button>
         </>
       )}
 
       {/* Trades Section */}
       {view === 'trades' && <Trades />}
-    </div>
-  );
-}
