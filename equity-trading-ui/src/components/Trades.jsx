@@ -31,32 +31,30 @@ export default function Trades() {
       <h2 className="text-2xl font-bold text-indigo-700 text-center mb-2">💼 Trades Dashboard</h2>
 
       {/* Toggle Buttons */}
-      <div className="relative w-full max-w-md mx-auto bg-gray-200 rounded-full shadow-inner p-1 flex justify-between">
-        {/* Sliding Pill */}
-        <div
-          className={`absolute top-1 left-1 h-[calc(100%-0.5rem)] w-1/3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 transition-transform duration-300 ease-in-out`}
-          style={{
-            transform:
-              status === 'open'
-                ? 'translateX(0%)'
-                : status === 'closed'
-                ? 'translateX(100%)'
-                : 'translateX(200%)',
-          }}
-        ></div>
+      <div className="relative w-full max-w-md mx-auto">
+        <div className="grid grid-cols-3 bg-gray-200 rounded-full shadow-inner p-1 relative">
+          {/* Sliding Pill */}
+          <span
+            className={`absolute inset-y-1 transition-all duration-300 rounded-full bg-gradient-to-r from-blue-500 to-purple-500`}
+            style={{
+              left: status === 'open' ? '4px' : status === 'closed' ? 'calc(33.333% + 4px)' : 'calc(66.666% + 4px)',
+              width: 'calc(33.333% - 8px)',
+            }}
+          ></span>
       
-        {/* Buttons */}
-        {['open', 'closed', 'all'].map((opt, idx) => (
-          <button
-            key={opt}
-            onClick={() => setStatus(opt)}
-            className={`w-1/3 z-10 py-2 font-semibold text-sm transition-all duration-300 rounded-full ${
-              status === opt ? 'text-white' : 'text-gray-800'
-            }`}
-          >
-            {opt.toUpperCase()}
-          </button>
-        ))}
+          {/* Buttons */}
+          {['open', 'closed', 'all'].map((opt) => (
+            <button
+              key={opt}
+              onClick={() => setStatus(opt)}
+              className={`relative z-10 w-full py-2 font-semibold text-sm transition-all rounded-full ${
+                status === opt ? 'text-white' : 'text-gray-800'
+              }`}
+            >
+              {opt.toUpperCase()}
+            </button>
+          ))}
+        </div>
       </div>
 
 
