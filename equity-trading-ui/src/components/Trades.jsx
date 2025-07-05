@@ -26,11 +26,11 @@ export default function Trades() {
 
   const statuses = ['open', 'closed', 'all'];
 
-  const renderExtraCards = () => {
+const renderExtraCards = () => {
     if (!summary) return null;
-
+  
     const extraCards = [];
-
+  
     if (status === 'open') {
       extraCards.push(
         { label: 'Total BUY', value: summary.total_buy_trades, color: 'text-indigo-700' },
@@ -53,9 +53,9 @@ export default function Trades() {
         { label: 'Winning %', value: `${summary.winning_pct.toFixed(2)}%`, color: 'text-green-600' }
       );
     }
-
+  
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="hidden md:grid grid-cols-2 md:grid-cols-4 gap-4">
         {extraCards.map((card, i) => (
           <div key={i} className="bg-white p-4 rounded-xl shadow text-center">
             <p className="text-gray-500 text-sm">{card.label}</p>
