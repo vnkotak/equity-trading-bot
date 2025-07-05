@@ -31,26 +31,34 @@ export default function Trades() {
       <h2 className="text-2xl font-bold text-indigo-700 text-center mb-2">💼 Trades Dashboard</h2>
 
       {/* Toggle Buttons */}
-      <div className="relative w-full max-w-md mx-auto">
-        <div className="grid grid-cols-3 bg-gray-200 rounded-full p-1 shadow-md relative">
-          <div
-            className={`absolute top-1 left-1 h-8 w-[calc(100%/3-0.5rem)] rounded-full bg-gradient-to-r from-indigo-500 via-blue-500 to-purple-500 shadow-md transition-all duration-300 ease-in-out transform ${
-              status === 'closed' ? 'translate-x-full' : status === 'all' ? 'translate-x-[200%]' : ''
+      <div className="relative w-full max-w-md mx-auto bg-gray-200 rounded-full shadow-inner p-1 flex justify-between">
+        {/* Sliding Pill */}
+        <div
+          className={`absolute top-1 left-1 h-[calc(100%-0.5rem)] w-1/3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 transition-transform duration-300 ease-in-out`}
+          style={{
+            transform:
+              status === 'open'
+                ? 'translateX(0%)'
+                : status === 'closed'
+                ? 'translateX(100%)'
+                : 'translateX(200%)',
+          }}
+        ></div>
+      
+        {/* Buttons */}
+        {['open', 'closed', 'all'].map((opt, idx) => (
+          <button
+            key={opt}
+            onClick={() => setStatus(opt)}
+            className={`w-1/3 z-10 py-2 font-semibold text-sm transition-all duration-300 rounded-full ${
+              status === opt ? 'text-white' : 'text-gray-800'
             }`}
-          ></div>
-          {statuses.map((opt, i) => (
-            <button
-              key={opt}
-              onClick={() => setStatus(opt)}
-              className={`z-10 h-8 text-sm font-semibold rounded-full transition-colors duration-300 ${
-                status === opt ? 'text-white' : 'text-gray-700'
-              }`}
-            >
-              {opt.toUpperCase()}
-            </button>
-          ))}
-        </div>
+          >
+            {opt.toUpperCase()}
+          </button>
+        ))}
       </div>
+
 
       {/* Summary Cards */}
       {summary && (
