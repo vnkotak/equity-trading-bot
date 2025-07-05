@@ -57,21 +57,26 @@ export default function App() {
         📈 NSE Screener Dashboard
       </h1>
 
-      <div className="flex justify-center gap-4 my-4">
-        <button
-          className={`px-4 py-2 rounded-full font-semibold shadow ${view === 'screener' ? 'bg-indigo-600 text-white' : 'bg-white text-indigo-600 border border-indigo-600'}`}
-          onClick={() => setView('screener')}
-        >
-          Screener
-        </button>
-        <button
-          className={`px-4 py-2 rounded-full font-semibold shadow ${view === 'trades' ? 'bg-indigo-600 text-white' : 'bg-white text-indigo-600 border border-indigo-600'}`}
-          onClick={() => setView('trades')}
-        >
-          Trades
-        </button>
+      {/* Fancy Toggle Button */}
+      <div className="flex justify-center">
+        <div className="bg-indigo-100 p-1 rounded-full flex gap-1 shadow-inner">
+          {['screener', 'trades'].map((v) => (
+            <button
+              key={v}
+              onClick={() => setView(v)}
+              className={`px-5 py-2 rounded-full font-semibold transition-all duration-300 ease-in-out ${
+                view === v
+                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
+                  : 'text-indigo-600 hover:bg-white'
+              }`}
+            >
+              {v === 'screener' ? '📊 Screener' : '📋 Trades'}
+            </button>
+          ))}
+        </div>
       </div>
 
+      {/* Screener Section */}
       {view === 'screener' && (
         <>
           {loading && (
@@ -105,6 +110,7 @@ export default function App() {
         </>
       )}
 
+      {/* Trades Section */}
       {view === 'trades' && <Trades />}
     </div>
   );
