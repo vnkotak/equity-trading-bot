@@ -9,7 +9,7 @@ export default function Trades() {
   const fetchTrades = async (filter) => {
     setLoading(true);
     try {
-      const res = await fetch(`https://fastapi-trading-bot-1.onrender.com/trades?status=${filter}`);
+      const res = await fetch(`https://fastapi-trading-bot-1.onrender.com/trades-summary?status=${filter}`);
       const data = await res.json();
       setTrades(data.trades || []);
       setSummary(data.summary || null);
