@@ -58,38 +58,32 @@ export default function App() {
       </h1>
 
       {/* Fancy Toggle Button */}
-      <div className="relative flex justify-center my-6">
-        <div className="relative bg-gray-200 rounded-full p-1 shadow-inner w-[280px]">
-          <div
-            className={`absolute top-1 left-1 h-10 w-[130px] rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 shadow-md transition-all duration-300 ${
-              view === 'trades' ? 'translate-x-[134px]' : 'translate-x-0'
+      <div className="relative w-full max-w-xs mx-auto mt-4">
+      <div className="grid grid-cols-2 bg-gray-200 rounded-full shadow-inner p-1 relative">
+        {/* Sliding Highlight */}
+        <span
+          className={`absolute inset-y-1 transition-all duration-300 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500`}
+          style={{
+            left: view === 'screener' ? '4px' : 'calc(50% + 4px)',
+            width: 'calc(50% - 8px)',
+          }}
+        ></span>
+    
+        {/* Toggle Buttons */}
+        {['screener', 'trades'].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setView(tab)}
+            className={`relative z-10 w-full py-2 font-semibold text-sm transition-all rounded-full ${
+              view === tab ? 'text-white' : 'text-gray-800'
             }`}
-          ></div>
-      
-          <div className="relative z-10 flex justify-between">
-            <button
-              className={`w-[130px] h-10 rounded-full font-semibold transition duration-200 ${
-                view === 'screener'
-                  ? 'text-white'
-                  : 'text-gray-700 hover:text-indigo-700 hover:font-semibold'
-              }`}
-              onClick={() => setView('screener')}
-            >
-              Screener
-            </button>
-            <button
-              className={`w-[130px] h-10 rounded-full font-semibold transition duration-200 ${
-                view === 'trades'
-                  ? 'text-white'
-                  : 'text-gray-700 hover:text-indigo-700 hover:font-semibold'
-              }`}
-              onClick={() => setView('trades')}
-            >
-              Trades
-            </button>
-          </div>
-        </div>
+          >
+            {tab.toUpperCase()}
+          </button>
+        ))}
       </div>
+    </div>
+
 
 
       {/* Screener Section */}
