@@ -26,6 +26,46 @@ export default function Trades() {
 
   const statuses = ['open', 'closed', 'all'];
 
+  const renderExtraCards = () => {
+    if (!summary) return null;
+
+    const extraCards = [];
+
+    if (status === 'open') {
+      extraCards.push(
+        { label: 'Total BUY', value: summary.total_buy_trades, color: 'text-indigo-700' },
+        { label: 'Open Trades', value: summary.open_trades, color: 'text-orange-600' },
+        { label: 'Winning Trades', value: summary.winning_trades, color: 'text-green-600' },
+        { label: 'Winning %', value: `${summary.winning_pct.toFixed(2)}%`, color: 'text-green-600' }
+      );
+    } else if (status === 'closed') {
+      extraCards.push(
+        { label: 'Total BUY', value: summary.total_buy_trades, color: 'text-indigo-700' },
+        { label: 'Closed Trades', value: summary.closed_trades, color: 'text-green-700' },
+        { label: 'Winning Trades', value: summary.winning_trades, color: 'text-green-600' },
+        { label: 'Winning %', value: `${summary.winning_pct.toFixed(2)}%`, color: 'text-green-600' }
+      );
+    } else if (status === 'all') {
+      extraCards.push(
+        { label: 'Open Trades', value: summary.open_trades, color: 'text-orange-600' },
+        { label: 'Closed Trades', value: summary.closed_trades, color: 'text-green-700' },
+        { label: 'Winning Trades', value: summary.winning_trades, color: 'text-green-600' },
+        { label: 'Winning %', value: `${summary.winning_pct.toFixed(2)}%`, color: 'text-green-600' }
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {extraCards.map((card, i) => (
+          <div key={i} className="bg-white p-4 rounded-xl shadow text-center">
+            <p className="text-gray-500 text-sm">{card.label}</p>
+            <p className={`text-lg font-bold ${card.color}`}>{card.value}</p>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto px-4 space-y-6">
       <h2 className="text-2xl font-bold text-indigo-700 text-center mb-2">💼 Trades Dashboard</h2>
@@ -57,54 +97,33 @@ export default function Trades() {
 
       {/* Summary Dashboard */}
       {summary && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white p-4 rounded-xl shadow text-center">
-            <p className="text-gray-500 text-sm">Total Invested</p>
-            <p className="text-lg font-bold text-blue-800">₹{summary.total_invested.toFixed(2)}</p>
-          </div>
-          <div className="bg-white p-4 rounded-xl shadow text-center">
-            <p className="text-gray-500 text-sm">Current Value</p>
-            <p className="text-lg font-bold text-green-700">₹{summary.current_value.toFixed(2)}</p>
-          </div>
-          <div className="bg-white p-4 rounded-xl shadow text-center">
-            <p className="text-gray-500 text-sm">Profit</p>
-            <p className={`text-lg font-bold ${summary.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              ₹{summary.profit.toFixed(2)}
-            </p>
-          </div>
-          <div className="bg-white p-4 rounded-xl shadow text-center">
-            <p className="text-gray-500 text-sm">Profit %</p>
-            <p className={`text-lg font-bold ${summary.profit_pct >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {summary.profit_pct.toFixed(2)}%
-            </p>
+        <>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-white p-4 rounded-xl shadow text-center">
+              <p className="text-gray-500 text-sm">Total Invested</p>
+              <p className="text-lg font-bold text-blue-800">₹{summary.total_invested.toFixed(2)}</p>
+            </div>
+            <div className="bg-white p-4 rounded-xl shadow text-center">
+              <p className="text-gray-500 text-sm">Current Value</p>
+              <p className="text-lg font-bold text-green-700">₹{summary.current_value.toFixed(2)}</p>
+            </div>
+            <div className="bg-white p-4 rounded-xl shadow text-center">
+              <p className="text-gray-500 text-sm">Profit</p>
+              <p className={`text-lg font-bold ${summary.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                ₹{summary.profit.toFixed(2)}
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-xl shadow text-center">
+              <p className="text-gray-500 text-sm">Profit %</p>
+              <p className={`text-lg font-bold ${summary.profit_pct >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {summary.profit_pct.toFixed(2)}%
+              </p>
+            </div>
           </div>
 
-          {/* New Stats */}
-          <div className="bg-white p-4 rounded-xl shadow text-center">
-            <p className="text-gray-500 text-sm">Total Trades</p>
-            <p className="text-lg font-bold text-indigo-700">{summary.total_trades}</p>
-          </div>
-          <div className="bg-white p-4 rounded-xl shadow text-center">
-            <p className="text-gray-500 text-sm">Total BUY</p>
-            <p className="text-lg font-bold text-indigo-700">{summary.total_buy_trades}</p>
-          </div>
-          <div className="bg-white p-4 rounded-xl shadow text-center">
-            <p className="text-gray-500 text-sm">Open Trades</p>
-            <p className="text-lg font-bold text-orange-600">{summary.open_trades}</p>
-          </div>
-          <div className="bg-white p-4 rounded-xl shadow text-center">
-            <p className="text-gray-500 text-sm">Closed Trades</p>
-            <p className="text-lg font-bold text-green-700">{summary.closed_trades}</p>
-          </div>
-          <div className="bg-white p-4 rounded-xl shadow text-center">
-            <p className="text-gray-500 text-sm">Winning Trades</p>
-            <p className="text-lg font-bold text-green-600">{summary.winning_trades}</p>
-          </div>
-          <div className="bg-white p-4 rounded-xl shadow text-center">
-            <p className="text-gray-500 text-sm">Winning %</p>
-            <p className="text-lg font-bold text-green-600">{summary.winning_pct.toFixed(2)}%</p>
-          </div>
-        </div>
+          {/* Additional Dynamic Cards */}
+          {renderExtraCards()}
+        </>
       )}
 
       {/* Trades Table */}
