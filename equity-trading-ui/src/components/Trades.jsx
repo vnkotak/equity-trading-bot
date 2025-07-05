@@ -33,7 +33,7 @@ export default function Trades() {
       <div className="relative w-full max-w-sm mx-auto">
         <div className="grid grid-cols-3 bg-gray-200 rounded-full shadow-inner p-1 relative">
           <span
-            className={`absolute inset-y-1 transition-all duration-300 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500`}
+            className="absolute inset-y-1 transition-all duration-300 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500"
             style={{
               left: status === 'open' ? '4px' : status === 'closed' ? 'calc(33.333% + 4px)' : 'calc(66.666% + 4px)',
               width: 'calc(33.333% - 8px)',
@@ -56,12 +56,18 @@ export default function Trades() {
       {/* Dashboard Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white p-4 rounded-xl shadow">
         {['total_invested', 'current_value', 'profit', 'profit_pct'].map((key) => (
-          <div key={key} className="text-center">
+          <div key={key} className="text-center min-h-[60px]">
             <p className="text-gray-500 text-sm capitalize">{key.replace(/_/g, ' ')}</p>
-            <p className={`text-lg font-bold ${
-              key.includes('profit') ? (summary && summary[key] >= 0 ? 'text-green-600' : 'text-red-600') : 'text-blue-800'
-            }`}>
-              {loading ? <Loader2 className="animate-spin w-5 h-5 mx-auto" /> : key.includes('pct') ? `${summary?.[key]?.toFixed(2)}%` : `₹${summary?.[key]?.toFixed(2)}`}
+            <p
+              className={`text-lg font-bold ${
+                key.includes('profit')
+                  ? summary && summary[key] >= 0
+                    ? 'text-green-600'
+                    : 'text-red-600'
+                  : 'text-blue-800'
+              }`}
+            >
+              {loading ? <LoadingDots /> : key.includes('pct') ? `${summary?.[key]?.toFixed(2)}%` : `₹${summary?.[key]?.toFixed(2)}`}
             </p>
           </div>
         ))}
@@ -96,14 +102,14 @@ export default function Trades() {
       </div>
 
       {/* Trades Table */}
-      {loading ? (
-        <div className="flex justify-center items-center py-6 min-h-[150px]">
-          <BouncingDots />
-        </div>
-      ) : trades.length === 0 ? (
-        <p className="text-center text-red-500 font-medium">No trades to display.</p>
-      ) : (
-        <div className="overflow-x-auto">
+      <div className="overflow-x-auto min-h-[150px]">
+        {loading ? (
+          <div className="flex justify-center items-center py-6">
+            <LoadingDots />
+          </div>
+        ) : trades.length === 0 ? (
+          <p className="text-center text-red-500 font-medium">No trades to display.</p>
+        ) : (
           <table className="min-w-full table-auto border-collapse border text-sm">
             <thead>
               <tr className="bg-indigo-100 text-indigo-800 text-center">
@@ -125,36 +131,42 @@ export default function Trades() {
                   <td className="p-2 border">{t.action}</td>
                   <td className="p-2 border">₹{parseFloat(t.price).toFixed(2)}</td>
                   <td className="p-2 border">₹{t.sell_or_current_price?.toFixed(2)}</td>
-                  <td className={`p-2 border ${t.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>₹{t.profit.toFixed(2)}</td>
-                  <td className={`p-2 border ${t.profit_pct >= 0 ? 'text-green-600' : 'text-red-600'}`}>{t.profit_pct.toFixed(2)}%</td>
+                  <td className={`p-2 border ${t.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    ₹{t.profit.toFixed(2)}
+                  </td>
+                  <td className={`p-2 border ${t.profit_pct >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {t.profit_pct.toFixed(2)}%
+                  </td>
                   <td className="p-2 border">{t.status}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
 
+// 📦 Metric card reusable component
 function MetricCard({ title, value, loading }) {
   return (
-    <div className="text-center">
+    <div className="text-center min-h-[60px]">
       <p className="text-gray-500 text-sm">{title}</p>
       <p className="text-lg font-bold text-indigo-700">
-        {loading ? <Loader2 className="animate-spin w-5 h-5 mx-auto" /> : value}
+        {loading ? <LoadingDots /> : value}
       </p>
     </div>
   );
 }
 
-function BouncingDots() {
+// 🎯 Custom bouncing dots loader
+function LoadingDots() {
   return (
-    <div className="flex justify-center items-center h-5 space-x-1">
-      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
-      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
-      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" />
+    <div className="flex justify-center items-center gap-1 h-5">
+      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.2s]"></span>
+      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.1s]"></span>
+      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></span>
     </div>
   );
 }
