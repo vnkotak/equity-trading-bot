@@ -32,17 +32,17 @@ export default function Trades() {
 
       {/* Toggle Buttons */}
       <div className="relative w-full max-w-md mx-auto">
-        <div className="flex bg-gray-200 rounded-full p-1 shadow-md relative">
+        <div className="grid grid-cols-3 bg-gray-200 rounded-full p-1 shadow-md relative">
           <div
-            className={`absolute top-1 left-1 h-8 w-1/3 rounded-full bg-gradient-to-r from-indigo-500 via-blue-500 to-purple-500 shadow transition-all duration-300 ease-in-out transform ${
+            className={`absolute top-1 left-1 h-8 w-[calc(100%/3-0.5rem)] rounded-full bg-gradient-to-r from-indigo-500 via-blue-500 to-purple-500 shadow-md transition-all duration-300 ease-in-out transform ${
               status === 'closed' ? 'translate-x-full' : status === 'all' ? 'translate-x-[200%]' : ''
             }`}
           ></div>
-          {statuses.map((opt) => (
+          {statuses.map((opt, i) => (
             <button
               key={opt}
               onClick={() => setStatus(opt)}
-              className={`w-1/3 z-10 text-sm font-semibold rounded-full h-8 transition-colors duration-300 ${
+              className={`z-10 h-8 text-sm font-semibold rounded-full transition-colors duration-300 ${
                 status === opt ? 'text-white' : 'text-gray-700'
               }`}
             >
