@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
 export default function Trades() {
   const [trades, setTrades] = useState([]);
@@ -24,68 +25,25 @@ export default function Trades() {
     fetchTrades(status);
   }, [status]);
 
-  const statuses = ['open', 'closed', 'all'];
-
-const renderExtraCards = () => {
-    if (!summary) return null;
-  
-    const extraCards = [];
-  
-    if (status === 'open') {
-      extraCards.push(
-        { label: 'Total BUY', value: summary.total_buy_trades, color: 'text-indigo-700' },
-        { label: 'Open Trades', value: summary.open_trades, color: 'text-orange-600' },
-        { label: 'Winning Trades', value: summary.winning_trades, color: 'text-green-600' },
-        { label: 'Winning %', value: `${summary.winning_pct.toFixed(2)}%`, color: 'text-green-600' }
-      );
-    } else if (status === 'closed') {
-      extraCards.push(
-        { label: 'Total BUY', value: summary.total_buy_trades, color: 'text-indigo-700' },
-        { label: 'Closed Trades', value: summary.closed_trades, color: 'text-green-700' },
-        { label: 'Winning Trades', value: summary.winning_trades, color: 'text-green-600' },
-        { label: 'Winning %', value: `${summary.winning_pct.toFixed(2)}%`, color: 'text-green-600' }
-      );
-    } else if (status === 'all') {
-      extraCards.push(
-        { label: 'Open Trades', value: summary.open_trades, color: 'text-orange-600' },
-        { label: 'Closed Trades', value: summary.closed_trades, color: 'text-green-700' },
-        { label: 'Winning Trades', value: summary.winning_trades, color: 'text-green-600' },
-        { label: 'Winning %', value: `${summary.winning_pct.toFixed(2)}%`, color: 'text-green-600' }
-      );
-    }
-  
-    return (
-      <div className="hidden md:grid grid-cols-2 md:grid-cols-4 gap-4">
-        {extraCards.map((card, i) => (
-          <div key={i} className="bg-white p-4 rounded-xl shadow text-center">
-            <p className="text-gray-500 text-sm">{card.label}</p>
-            <p className={`text-lg font-bold ${card.color}`}>{card.value}</p>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 space-y-6">
-      <h2 className="text-2xl font-bold text-indigo-700 text-center mb-2">💼 Trades Dashboard</h2>
+    <div className="p-4 space-y-6">
+      <h1 className="text-2xl font-bold text-indigo-700 text-center">💼 Trades Dashboard</h1>
 
-      {/* Toggle Buttons */}
-      <div className="relative w-full max-w-md mx-auto">
+      {/* Toggle Button */}
+      <div className="relative w-full max-w-sm mx-auto">
         <div className="grid grid-cols-3 bg-gray-200 rounded-full shadow-inner p-1 relative">
           <span
-            className={`absolute inset-y-1 transition-all duration-300 rounded-full bg-gradient-to-r from-blue-500 to-purple-500`}
+            className={`absolute inset-y-1 transition-all duration-300 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500`}
             style={{
               left: status === 'open' ? '4px' : status === 'closed' ? 'calc(33.333% + 4px)' : 'calc(66.666% + 4px)',
               width: 'calc(33.333% - 8px)',
             }}
           ></span>
-
-          {statuses.map((opt) => (
+          {['open', 'closed', 'all'].map((opt) => (
             <button
               key={opt}
               onClick={() => setStatus(opt)}
-              className={`relative z-10 w-full py-2 font-semibold text-sm transition-all rounded-full ${
+              className={`relative z-10 w-full py-2 text-sm font-semibold rounded-full transition-all duration-200 ${
                 status === opt ? 'text-white' : 'text-gray-800'
               }`}
             >
@@ -95,71 +53,80 @@ const renderExtraCards = () => {
         </div>
       </div>
 
-      {/* Summary Dashboard */}
-      {summary && (
-        <>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white p-4 rounded-xl shadow text-center">
-              <p className="text-gray-500 text-sm">Total Invested</p>
-              <p className="text-lg font-bold text-blue-800">₹{summary.total_invested.toFixed(2)}</p>
-            </div>
-            <div className="bg-white p-4 rounded-xl shadow text-center">
-              <p className="text-gray-500 text-sm">Current Value</p>
-              <p className="text-lg font-bold text-green-700">₹{summary.current_value.toFixed(2)}</p>
-            </div>
-            <div className="bg-white p-4 rounded-xl shadow text-center">
-              <p className="text-gray-500 text-sm">Profit</p>
-              <p className={`text-lg font-bold ${summary.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                ₹{summary.profit.toFixed(2)}
-              </p>
-            </div>
-            <div className="bg-white p-4 rounded-xl shadow text-center">
-              <p className="text-gray-500 text-sm">Profit %</p>
-              <p className={`text-lg font-bold ${summary.profit_pct >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {summary.profit_pct.toFixed(2)}%
-              </p>
-            </div>
+      {/* Dashboard Summary Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white p-4 rounded-xl shadow">
+        {['total_invested', 'current_value', 'profit', 'profit_pct'].map((key) => (
+          <div key={key} className="text-center">
+            <p className="text-gray-500 text-sm capitalize">{key.replace(/_/g, ' ')}</p>
+            <p className={`text-lg font-bold ${
+              key.includes('profit') ? (summary && summary[key] >= 0 ? 'text-green-600' : 'text-red-600') : 'text-blue-800'
+            }`}>
+              {loading ? <Loader2 className="animate-spin w-5 h-5 mx-auto" /> : key.includes('pct') ? `${summary?.[key]?.toFixed(2)}%` : `₹${summary?.[key]?.toFixed(2)}`}
+            </p>
           </div>
+        ))}
+      </div>
 
-          {/* Additional Dynamic Cards */}
-          {renderExtraCards()}
-        </>
-      )}
+      {/* Secondary Metrics Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white p-4 rounded-xl shadow">
+        {status === 'open' && (
+          <>
+            <MetricCard title="Total Buys" value={summary?.total_buy_trades} loading={loading} />
+            <MetricCard title="Open Trades" value={summary?.open_trades} loading={loading} />
+            <MetricCard title="Winning Trades" value={summary?.winning_trades} loading={loading} />
+            <MetricCard title="Winning %" value={`${summary?.winning_pct?.toFixed(2)}%`} loading={loading} />
+          </>
+        )}
+        {status === 'closed' && (
+          <>
+            <MetricCard title="Total Buys" value={summary?.total_buy_trades} loading={loading} />
+            <MetricCard title="Closed Trades" value={summary?.closed_trades} loading={loading} />
+            <MetricCard title="Winning Trades" value={summary?.winning_trades} loading={loading} />
+            <MetricCard title="Winning %" value={`${summary?.winning_pct?.toFixed(2)}%`} loading={loading} />
+          </>
+        )}
+        {status === 'all' && (
+          <>
+            <MetricCard title="Open Trades" value={summary?.open_trades} loading={loading} />
+            <MetricCard title="Closed Trades" value={summary?.closed_trades} loading={loading} />
+            <MetricCard title="Winning Trades" value={summary?.winning_trades} loading={loading} />
+            <MetricCard title="Winning %" value={`${summary?.winning_pct?.toFixed(2)}%`} loading={loading} />
+          </>
+        )}
+      </div>
 
       {/* Trades Table */}
       {loading ? (
-        <p className="text-center text-sm text-gray-500">Loading trades...</p>
+        <div className="flex justify-center items-center py-6">
+          <Loader2 className="animate-spin w-6 h-6 text-gray-500" />
+        </div>
       ) : trades.length === 0 ? (
         <p className="text-center text-red-500 font-medium">No trades to display.</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full border-collapse border text-sm text-center bg-white rounded-xl shadow">
+          <table className="min-w-full table-auto border-collapse border text-sm">
             <thead>
-              <tr className="bg-indigo-100 text-indigo-800">
-                <th className="p-3 border">Date</th>
-                <th className="p-3 border">Ticker</th>
-                <th className="p-3 border">Action</th>
-                <th className="p-3 border">Buy Price</th>
-                <th className="p-3 border">Sell/Current</th>
-                <th className="p-3 border">Profit</th>
-                <th className="p-3 border">Profit %</th>
-                <th className="p-3 border">Status</th>
+              <tr className="bg-indigo-100 text-indigo-800 text-center">
+                <th className="p-2 border">Date</th>
+                <th className="p-2 border">Ticker</th>
+                <th className="p-2 border">Action</th>
+                <th className="p-2 border">Buy Price</th>
+                <th className="p-2 border">Sell/Current Price</th>
+                <th className="p-2 border">Profit</th>
+                <th className="p-2 border">Profit %</th>
+                <th className="p-2 border">Status</th>
               </tr>
             </thead>
             <tbody>
               {trades.map((t) => (
-                <tr key={t.id} className="hover:bg-gray-50">
+                <tr key={t.id} className="text-center hover:bg-gray-50">
                   <td className="p-2 border">{new Date(t.timestamp).toLocaleDateString()}</td>
                   <td className="p-2 border">{t.ticker}</td>
                   <td className="p-2 border">{t.action}</td>
                   <td className="p-2 border">₹{parseFloat(t.price).toFixed(2)}</td>
                   <td className="p-2 border">₹{t.sell_or_current_price?.toFixed(2)}</td>
-                  <td className={`p-2 border ${t.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    ₹{t.profit.toFixed(2)}
-                  </td>
-                  <td className={`p-2 border ${t.profit_pct >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {t.profit_pct.toFixed(2)}%
-                  </td>
+                  <td className={`p-2 border ${t.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>₹{t.profit.toFixed(2)}</td>
+                  <td className={`p-2 border ${t.profit_pct >= 0 ? 'text-green-600' : 'text-red-600'}`}>{t.profit_pct.toFixed(2)}%</td>
                   <td className="p-2 border">{t.status}</td>
                 </tr>
               ))}
@@ -167,6 +134,17 @@ const renderExtraCards = () => {
           </table>
         </div>
       )}
+    </div>
+  );
+}
+
+function MetricCard({ title, value, loading }) {
+  return (
+    <div className="text-center">
+      <p className="text-gray-500 text-sm">{title}</p>
+      <p className="text-lg font-bold text-indigo-700">
+        {loading ? <Loader2 className="animate-spin w-5 h-5 mx-auto" /> : value}
+      </p>
     </div>
   );
 }
