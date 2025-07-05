@@ -58,27 +58,36 @@ export default function App() {
       </h1>
 
       {/* Fancy Toggle Button */}
-      <div className="flex justify-center">
-        <div className="relative inline-flex p-1 bg-white/60 backdrop-blur-md border border-indigo-300 rounded-full shadow-lg transition-all duration-300">
-          {['screener', 'trades'].map((v) => {
-            const isActive = view === v;
-            return (
-              <button
-                key={v}
-                onClick={() => setView(v)}
-                className={`relative z-10 px-6 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${
-                  isActive
-                    ? 'text-white'
-                    : 'text-indigo-700 hover:text-indigo-900'
-                }`}
-              >
-                {isActive && (
-                  <div className="absolute inset-0 z-[-1] rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 shadow-md transition-all duration-300"></div>
-                )}
-                {v === 'screener' ? '📊 Screener' : '📋 Trades'}
-              </button>
-            );
-          })}
+      <div className="relative flex justify-center my-6">
+        <div className="relative bg-gray-200 rounded-full p-1 shadow-inner w-[280px]">
+          <div
+            className={`absolute top-1 left-1 h-10 w-[130px] rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 shadow-md transition-all duration-300 ${
+              view === 'trades' ? 'translate-x-[134px]' : 'translate-x-0'
+            }`}
+          ></div>
+      
+          <div className="relative z-10 flex justify-between">
+            <button
+              className={`w-[130px] h-10 rounded-full font-semibold transition duration-200 ${
+                view === 'screener'
+                  ? 'text-white'
+                  : 'text-gray-700 hover:text-indigo-700 hover:font-semibold'
+              }`}
+              onClick={() => setView('screener')}
+            >
+              Screener
+            </button>
+            <button
+              className={`w-[130px] h-10 rounded-full font-semibold transition duration-200 ${
+                view === 'trades'
+                  ? 'text-white'
+                  : 'text-gray-700 hover:text-indigo-700 hover:font-semibold'
+              }`}
+              onClick={() => setView('trades')}
+            >
+              Trades
+            </button>
+          </div>
         </div>
       </div>
 
