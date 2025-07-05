@@ -55,7 +55,7 @@ export default function App() {
   useEffect(() => {
     if (stocks.length > 0 || view !== 'screener') return;
     fetchAllStocks();
-  }, []); // only run on initial mount
+  }, []); // only run once on mount
 
   return (
     <div className="min-h-screen bg-slate-50 p-6 space-y-6 relative">
@@ -63,10 +63,9 @@ export default function App() {
         📈 NSE Equity Dashboard
       </h1>
 
-      {/* Fancy Toggle Button */}
+      {/* Toggle: Screener / Trades */}
       <div className="relative w-full max-w-xs mx-auto mt-4">
         <div className="grid grid-cols-2 bg-gray-200 rounded-full shadow-inner p-1 relative">
-          {/* Sliding Highlight */}
           <span
             className={`absolute inset-y-1 transition-all duration-300 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500`}
             style={{
@@ -134,3 +133,6 @@ export default function App() {
 
       {/* Trades Section */}
       {view === 'trades' && <Trades />}
+    </div>
+  );
+}
