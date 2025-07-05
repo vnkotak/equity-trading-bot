@@ -33,7 +33,6 @@ export default function Trades() {
       {/* Toggle Buttons */}
       <div className="relative w-full max-w-md mx-auto">
         <div className="grid grid-cols-3 bg-gray-200 rounded-full shadow-inner p-1 relative">
-          {/* Sliding Pill */}
           <span
             className={`absolute inset-y-1 transition-all duration-300 rounded-full bg-gradient-to-r from-blue-500 to-purple-500`}
             style={{
@@ -41,9 +40,8 @@ export default function Trades() {
               width: 'calc(33.333% - 8px)',
             }}
           ></span>
-      
-          {/* Buttons */}
-          {['open', 'closed', 'all'].map((opt) => (
+
+          {statuses.map((opt) => (
             <button
               key={opt}
               onClick={() => setStatus(opt)}
@@ -57,8 +55,7 @@ export default function Trades() {
         </div>
       </div>
 
-
-      {/* Summary Cards */}
+      {/* Summary Dashboard */}
       {summary && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white p-4 rounded-xl shadow text-center">
@@ -81,10 +78,36 @@ export default function Trades() {
               {summary.profit_pct.toFixed(2)}%
             </p>
           </div>
+
+          {/* New Stats */}
+          <div className="bg-white p-4 rounded-xl shadow text-center">
+            <p className="text-gray-500 text-sm">Total Trades</p>
+            <p className="text-lg font-bold text-indigo-700">{summary.total_trades}</p>
+          </div>
+          <div className="bg-white p-4 rounded-xl shadow text-center">
+            <p className="text-gray-500 text-sm">Total BUY</p>
+            <p className="text-lg font-bold text-indigo-700">{summary.total_buy_trades}</p>
+          </div>
+          <div className="bg-white p-4 rounded-xl shadow text-center">
+            <p className="text-gray-500 text-sm">Open Trades</p>
+            <p className="text-lg font-bold text-orange-600">{summary.open_trades}</p>
+          </div>
+          <div className="bg-white p-4 rounded-xl shadow text-center">
+            <p className="text-gray-500 text-sm">Closed Trades</p>
+            <p className="text-lg font-bold text-green-700">{summary.closed_trades}</p>
+          </div>
+          <div className="bg-white p-4 rounded-xl shadow text-center">
+            <p className="text-gray-500 text-sm">Winning Trades</p>
+            <p className="text-lg font-bold text-green-600">{summary.winning_trades}</p>
+          </div>
+          <div className="bg-white p-4 rounded-xl shadow text-center">
+            <p className="text-gray-500 text-sm">Winning %</p>
+            <p className="text-lg font-bold text-green-600">{summary.winning_pct.toFixed(2)}%</p>
+          </div>
         </div>
       )}
 
-      {/* Table */}
+      {/* Trades Table */}
       {loading ? (
         <p className="text-center text-sm text-gray-500">Loading trades...</p>
       ) : trades.length === 0 ? (
