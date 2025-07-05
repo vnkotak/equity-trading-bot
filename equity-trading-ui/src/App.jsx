@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PlotlyStockCard from './components/PlotlyStockCard';
 import Trades from './components/Trades';
+import { RotateCw } from 'lucide-react';
 
 export default function App() {
   const [view, setView] = useState('screener');
@@ -10,91 +11,101 @@ export default function App() {
   const [total, setTotal] = useState(0);
   const [currentTicker, setCurrentTicker] = useState('');
 
-useEffect(() => {
-    // Only fetch once if already fetched
-    if (stocks.length > 0 || view !== 'screener') return;
-  
-    const fetchAllStocks = async () => {
-      try {
-        const metaRes = await fetch('https://fastapi-trading-bot-1.onrender.com/screener-meta');
-        const metaData = await metaRes.json();
-        const tickers = metaData.tickers || [];
-        setTotal(tickers.length);
-  
-        for (let i = 0; i < tickers.length; i++) {
-          const ticker = tickers[i];
-          setCurrentTicker(ticker);
-  
-          try {
-            const stockRes = await fetch(`https://fastapi-trading-bot-1.onrender.com/screener-stock?ticker=${ticker}`);
-            const stockData = await stockRes.json();
-  
-            if (
-              stockData &&
-              stockData.history &&
-              stockData.history.length > 0 &&
-              stockData.match_type === 'full'
-            ) {
-              setStocks((prev) => {
-                // Prevent duplicates
-                if (prev.find((s) => s.ticker === stockData.ticker)) return prev;
-                return [...prev, stockData];
-              });
-            }
-          } catch (err) {
-            console.warn(`⚠️ Failed to fetch ${ticker}`);
+  const fetchAllStocks = async () => {
+    try {
+      setStocks([]);
+      setProgress(0);
+      setCurrentTicker('');
+      setLoading(true);
+
+      const metaRes = await fetch('https://fastapi-trading-bot-1.onrender.com/screener-meta');
+      const metaData = await metaRes.json();
+      const tickers = metaData.tickers || [];
+      setTotal(tickers.length);
+
+      for (let i = 0; i < tickers.length; i++) {
+        const ticker = tickers[i];
+        setCurrentTicker(ticker);
+
+        try {
+          const stockRes = await fetch(`https://fastapi-trading-bot-1.onrender.com/screener-stock?ticker=${ticker}`);
+          const stockData = await stockRes.json();
+
+          if (
+            stockData &&
+            stockData.history &&
+            stockData.history.length > 0 &&
+            stockData.match_type === 'full'
+          ) {
+            setStocks((prev) => {
+              if (prev.find((s) => s.ticker === stockData.ticker)) return prev;
+              return [...prev, stockData];
+            });
           }
-  
-          setProgress(Math.round(((i + 1) / tickers.length) * 100));
+        } catch (err) {
+          console.warn(`⚠️ Failed to fetch ${ticker}`);
         }
-      } catch (err) {
-        console.error('❌ Error in fetching screener meta:', err);
-      } finally {
-        setLoading(false);
+
+        setProgress(Math.round(((i + 1) / tickers.length) * 100));
       }
-    };
-  
+    } catch (err) {
+      console.error('❌ Error in fetching screener meta:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (stocks.length > 0 || view !== 'screener') return;
     fetchAllStocks();
-  }, []); // ← empty dependency = only runs once on mount
+  }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 space-y-6">
+    <div className="min-h-screen bg-slate-50 p-6 space-y-6 font-sans">
       <h1 className="text-4xl font-extrabold text-center text-indigo-700 drop-shadow-sm">
         📈 NSE Equity Dashboard
       </h1>
 
       {/* Fancy Toggle Button */}
       <div className="relative w-full max-w-xs mx-auto mt-4">
-      <div className="grid grid-cols-2 bg-gray-200 rounded-full shadow-inner p-1 relative">
-        {/* Sliding Highlight */}
-        <span
-          className={`absolute inset-y-1 transition-all duration-300 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500`}
-          style={{
-            left: view === 'screener' ? '4px' : 'calc(50% + 4px)',
-            width: 'calc(50% - 8px)',
-          }}
-        ></span>
-    
-        {/* Toggle Buttons */}
-        {['screener', 'trades'].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setView(tab)}
-            className={`relative z-10 w-full py-2 font-semibold text-sm transition-all rounded-full ${
-              view === tab ? 'text-white' : 'text-gray-800'
-            }`}
-          >
-            {tab.toUpperCase()}
-          </button>
-        ))}
+        <div className="grid grid-cols-2 bg-gray-200 rounded-full shadow-inner p-1 relative">
+          <span
+            className={`absolute inset-y-1 transition-all duration-300 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500`}
+            style={{
+              left: view === 'screener' ? '4px' : 'calc(50% + 4px)',
+              width: 'calc(50% - 8px)',
+            }}
+          ></span>
+
+          {['screener', 'trades'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setView(tab)}
+              className={`relative z-10 w-full py-2 font-semibold text-sm transition-all rounded-full ${
+                view === tab ? 'text-white' : 'text-gray-800'
+              }`}
+            >
+              {tab.toUpperCase()}
+            </button>
+          ))}
+        </div>
       </div>
-    </div>
-
-
 
       {/* Screener Section */}
       {view === 'screener' && (
         <>
+          {/* Refresh Button */}
+          <div className="flex justify-end -mb-2">
+            <button
+              onClick={fetchAllStocks}
+              className="flex items-center gap-1 text-sm px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full shadow hover:bg-indigo-200 transition"
+              title="Refresh Screener"
+            >
+              <RotateCw className="w-4 h-4" />
+              Refresh
+            </button>
+          </div>
+
           {loading && (
             <div className="text-center space-y-3 animate-fade-in">
               <p className="text-lg font-medium text-gray-700">
