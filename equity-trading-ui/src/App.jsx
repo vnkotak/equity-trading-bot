@@ -59,22 +59,29 @@ export default function App() {
 
       {/* Fancy Toggle Button */}
       <div className="flex justify-center">
-        <div className="bg-indigo-100 p-1 rounded-full flex gap-1 shadow-inner">
-          {['screener', 'trades'].map((v) => (
-            <button
-              key={v}
-              onClick={() => setView(v)}
-              className={`px-5 py-2 rounded-full font-semibold transition-all duration-300 ease-in-out ${
-                view === v
-                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
-                  : 'text-indigo-600 hover:bg-white'
-              }`}
-            >
-              {v === 'screener' ? '📊 Screener' : '📋 Trades'}
-            </button>
-          ))}
+        <div className="relative inline-flex p-1 bg-white/60 backdrop-blur-md border border-indigo-300 rounded-full shadow-lg transition-all duration-300">
+          {['screener', 'trades'].map((v) => {
+            const isActive = view === v;
+            return (
+              <button
+                key={v}
+                onClick={() => setView(v)}
+                className={`relative z-10 px-6 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${
+                  isActive
+                    ? 'text-white'
+                    : 'text-indigo-700 hover:text-indigo-900'
+                }`}
+              >
+                {isActive && (
+                  <div className="absolute inset-0 z-[-1] rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 shadow-md transition-all duration-300"></div>
+                )}
+                {v === 'screener' ? '📊 Screener' : '📋 Trades'}
+              </button>
+            );
+          })}
         </div>
       </div>
+
 
       {/* Screener Section */}
       {view === 'screener' && (
