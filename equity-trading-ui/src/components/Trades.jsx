@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Loader2 } from 'lucide-react';
 
 export default function Trades() {
   const [trades, setTrades] = useState([]);
@@ -27,29 +26,23 @@ export default function Trades() {
 
   return (
     <div className="p-4 space-y-6">
-      <h1 className="text-2xl font-bold text-indigo-700 text-center">💼 Trade Summary</h1>
+      <h1 className="text-2xl font-bold text-indigo-700 text-center">💼 Trades Dashboard</h1>
 
-      {/* Toggle Buttons */}
-      <div className="relative w-full max-w-sm mx-auto mt-2">
+      {/* Toggle Button */}
+      <div className="relative w-full max-w-sm mx-auto">
         <div className="grid grid-cols-3 bg-gray-200 rounded-full shadow-inner p-1 relative">
           <span
             className={`absolute inset-y-1 transition-all duration-300 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500`}
             style={{
-              left:
-                status === 'open'
-                  ? '4px'
-                  : status === 'closed'
-                  ? 'calc(33.333% + 4px)'
-                  : 'calc(66.666% + 4px)',
+              left: status === 'open' ? '4px' : status === 'closed' ? 'calc(33.333% + 4px)' : 'calc(66.666% + 4px)',
               width: 'calc(33.333% - 8px)',
             }}
           ></span>
-
           {['open', 'closed', 'all'].map((opt) => (
             <button
               key={opt}
               onClick={() => setStatus(opt)}
-              className={`relative z-10 w-full py-2 font-semibold text-sm transition-all rounded-full ${
+              className={`relative z-10 w-full py-2 text-sm font-semibold rounded-full transition-all duration-200 ${
                 status === opt ? 'text-white' : 'text-gray-800'
               }`}
             >
@@ -59,46 +52,52 @@ export default function Trades() {
         </div>
       </div>
 
-      {/* Dashboard Summary */}
-      {summary ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white p-4 rounded-xl shadow text-center">
-          <div>
-            <p className="text-gray-500 text-sm">Total Invested</p>
-            <p className="text-lg font-bold text-blue-800">₹{summary.total_invested.toFixed(2)}</p>
+      {/* Dashboard Summary Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white p-4 rounded-xl shadow">
+        {['total_invested', 'current_value', 'profit', 'profit_pct'].map((key) => (
+          <div key={key} className="text-center">
+            <p className="text-gray-500 text-sm capitalize">{key.replace(/_/g, ' ')}</p>
+            <p className={`text-lg font-bold ${
+              key.includes('profit') ? (summary && summary[key] >= 0 ? 'text-green-600' : 'text-red-600') : 'text-blue-800'
+            }`}>
+              {loading ? <BouncingDots /> : key.includes('pct') ? `${summary?.[key]?.toFixed(2)}%` : `₹${summary?.[key]?.toFixed(2)}`}
+            </p>
           </div>
-          <div>
-            <p className="text-gray-500 text-sm">Current Value</p>
-            <p className="text-lg font-bold text-green-700">₹{summary.current_value.toFixed(2)}</p>
-          </div>
-          <div>
-            <p className="text-gray-500 text-sm">Profit</p>
-            <p className={`text-lg font-bold ${summary.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>₹{summary.profit.toFixed(2)}</p>
-          </div>
-          <div>
-            <p className="text-gray-500 text-sm">Profit %</p>
-            <p className={`text-lg font-bold ${summary.profit_pct >= 0 ? 'text-green-600' : 'text-red-600'}`}>{summary.profit_pct.toFixed(2)}%</p>
-          </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white p-4 rounded-xl shadow text-center animate-pulse">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="flex flex-col gap-2">
-              <div className="h-4 w-3/5 mx-auto bg-gray-200 rounded"></div>
-              <div className="h-6 w-4/5 mx-auto bg-gray-300 rounded"></div>
-            </div>
-          ))}
-        </div>
-      )}
+        ))}
+      </div>
 
-      {/* Table */}
+      {/* Secondary Metrics Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white p-4 rounded-xl shadow">
+        {status === 'open' && (
+          <>
+            <MetricCard title="Total Buys" value={summary?.total_buy_trades} loading={loading} />
+            <MetricCard title="Open Trades" value={summary?.open_trades} loading={loading} />
+            <MetricCard title="Winning Trades" value={summary?.winning_trades} loading={loading} />
+            <MetricCard title="Winning %" value={`${summary?.winning_pct?.toFixed(2)}%`} loading={loading} />
+          </>
+        )}
+        {status === 'closed' && (
+          <>
+            <MetricCard title="Total Buys" value={summary?.total_buy_trades} loading={loading} />
+            <MetricCard title="Closed Trades" value={summary?.closed_trades} loading={loading} />
+            <MetricCard title="Winning Trades" value={summary?.winning_trades} loading={loading} />
+            <MetricCard title="Winning %" value={`${summary?.winning_pct?.toFixed(2)}%`} loading={loading} />
+          </>
+        )}
+        {status === 'all' && (
+          <>
+            <MetricCard title="Open Trades" value={summary?.open_trades} loading={loading} />
+            <MetricCard title="Closed Trades" value={summary?.closed_trades} loading={loading} />
+            <MetricCard title="Winning Trades" value={summary?.winning_trades} loading={loading} />
+            <MetricCard title="Winning %" value={`${summary?.winning_pct?.toFixed(2)}%`} loading={loading} />
+          </>
+        )}
+      </div>
+
+      {/* Trades Table */}
       {loading ? (
-        <div className="text-center text-sm text-gray-500">
-          <span className="inline-flex gap-1 items-center justify-center">
-            <span className="animate-bounce delay-100">.</span>
-            <span className="animate-bounce delay-200">.</span>
-            <span className="animate-bounce delay-300">.</span>
-          </span>{' '}
-          Loading trades...
+        <div className="flex justify-center items-center py-6">
+          <BouncingDots />
         </div>
       ) : trades.length === 0 ? (
         <p className="text-center text-red-500 font-medium">No trades to display.</p>
@@ -106,7 +105,7 @@ export default function Trades() {
         <div className="overflow-x-auto">
           <table className="min-w-full table-auto border-collapse border text-sm">
             <thead>
-              <tr className="bg-indigo-100 text-indigo-800">
+              <tr className="bg-indigo-100 text-indigo-800 text-center">
                 <th className="p-2 border">Date</th>
                 <th className="p-2 border">Ticker</th>
                 <th className="p-2 border">Action</th>
@@ -118,7 +117,7 @@ export default function Trades() {
               </tr>
             </thead>
             <tbody>
-              {trades.map((t, i) => (
+              {trades.map((t) => (
                 <tr key={t.id} className="text-center hover:bg-gray-50">
                   <td className="p-2 border">{new Date(t.timestamp).toLocaleDateString()}</td>
                   <td className="p-2 border">{t.ticker}</td>
@@ -134,6 +133,28 @@ export default function Trades() {
           </table>
         </div>
       )}
+    </div>
+  );
+}
+
+function MetricCard({ title, value, loading }) {
+  return (
+    <div className="text-center">
+      <p className="text-gray-500 text-sm">{title}</p>
+      <p className="text-lg font-bold text-indigo-700">
+        {loading ? <BouncingDots /> : value}
+      </p>
+    </div>
+  );
+}
+
+// 🟣 Bouncing Dots Animation
+function BouncingDots() {
+  return (
+    <div className="flex justify-center space-x-1">
+      <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+      <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+      <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce"></div>
     </div>
   );
 }
