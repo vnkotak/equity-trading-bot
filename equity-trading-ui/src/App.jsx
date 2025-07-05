@@ -12,8 +12,11 @@ export default function App() {
   const [currentTicker, setCurrentTicker] = useState('');
 
   const fetchAllStocks = async () => {
+    setProgress(0);
+    setCurrentTicker('');
     setLoading(true);
-    setStocks([]);
+    setStocks([]); 
+
     try {
       const metaRes = await fetch('https://fastapi-trading-bot-1.onrender.com/screener-meta');
       const metaData = await metaRes.json();
