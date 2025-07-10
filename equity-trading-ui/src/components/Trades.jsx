@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useTable, useSortBy, useGlobalFilter } from 'react-table';
+import matchSorter from 'match-sorter';
 import { Loader2 } from 'lucide-react';
 
 export default function Trades() {
@@ -25,17 +27,94 @@ export default function Trades() {
     fetchTrades(status);
   }, [status]);
 
+  const columns = useMemo(() => {
+    const baseCols = [
+      {
+        Header: 'Date',
+        accessor: (row) => new Date(row.timestamp).toLocaleDateString(),
+        id: 'date',
+      },
+      { Header: 'Ticker', accessor: 'ticker' },
+      { Header: 'Buy Price', accessor: (row) => `₹${parseFloat(row.price).toFixed(2)}`, id: 'price' },
+      {
+        Header: 'Sell/Current Price',
+        accessor: (row) => row.sell_or_current_price ? `₹${row.sell_or_current_price.toFixed(2)}` : '-',
+        id: 'sell_or_current_price',
+      },
+      {
+        Header: 'Quantity',
+        accessor: 'quantity',
+      },
+      {
+        Header: 'Invested',
+        accessor: (row) => `₹${row.total_invested?.toFixed(2)}`,
+        id: 'total_invested',
+      },
+      {
+        Header: 'Current Value',
+        accessor: (row) => row.current_value ? `₹${row.current_value.toFixed(2)}` : '-',
+        id: 'current_value',
+      },
+      {
+        Header: 'Profit',
+        accessor: (row) => `₹${row.profit.toFixed(2)}`,
+        id: 'profit',
+        Cell: ({ value }) => <span className={parseFloat(value) >= 0 ? 'text-green-600' : 'text-red-600'}>{value}</span>,
+      },
+      {
+        Header: 'Profit %',
+        accessor: (row) => `${row.profit_pct.toFixed(2)}%`,
+        id: 'profit_pct',
+        Cell: ({ value }) => <span className={parseFloat(value) >= 0 ? 'text-green-600' : 'text-red-600'}>{value}</span>,
+      },
+    ];
+
+    if (status === 'all') {
+      baseCols.push({ Header: 'Status', accessor: 'status' });
+    }
+
+    if (status === 'closed') {
+      baseCols.push({ Header: 'Reason', accessor: 'reason' });
+    }
+
+    return baseCols;
+  }, [status]);
+
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    rows,
+    prepareRow,
+    setGlobalFilter,
+  } = useTable(
+    {
+      columns,
+      data: trades,
+      autoResetSortBy: false,
+      globalFilter: (rows, columnIds, filterValue) =>
+        matchSorter(rows, filterValue, { keys: columnIds }),
+    },
+    useGlobalFilter,
+    useSortBy
+  );
+
   return (
     <div className="p-4 space-y-6">
       <h1 className="text-2xl font-bold text-indigo-700 text-center">💼 Trades Dashboard</h1>
 
-      {/* Toggle Button */}
+      {/* Toggle Buttons */}
       <div className="relative w-full max-w-sm mx-auto">
         <div className="grid grid-cols-3 bg-gray-200 rounded-full shadow-inner p-1 relative">
           <span
             className={`absolute inset-y-1 transition-all duration-300 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500`}
             style={{
-              left: status === 'open' ? '4px' : status === 'closed' ? 'calc(33.333% + 4px)' : 'calc(66.666% + 4px)',
+              left:
+                status === 'open'
+                  ? '4px'
+                  : status === 'closed'
+                  ? 'calc(33.333% + 4px)'
+                  : 'calc(66.666% + 4px)',
               width: 'calc(33.333% - 8px)',
             }}
           ></span>
@@ -53,7 +132,7 @@ export default function Trades() {
         </div>
       </div>
 
-      {/* Dashboard Summary Cards */}
+      {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white p-4 rounded-xl shadow">
         {['total_invested', 'current_value', 'profit', 'profit_pct'].map((key) => (
           <div key={key} className="text-center min-h-[48px] flex flex-col justify-center">
@@ -73,7 +152,7 @@ export default function Trades() {
         ))}
       </div>
 
-      {/* Secondary Metrics Cards */}
+      {/* Trade Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white p-4 rounded-xl shadow">
         {status === 'open' && (
           <>
@@ -101,6 +180,13 @@ export default function Trades() {
         )}
       </div>
 
+      {/* Search */}
+      <input
+        className="w-full max-w-md px-4 py-2 border rounded-lg shadow-sm"
+        placeholder="Search trades..."
+        onChange={(e) => setGlobalFilter(e.target.value)}
+      />
+
       {/* Trades Table */}
       {loading ? (
         <div className="flex justify-center items-center py-6">
@@ -109,49 +195,39 @@ export default function Trades() {
       ) : trades.length === 0 ? (
         <p className="text-center text-red-500 font-medium">No trades to display.</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full table-auto border-collapse border text-sm">
-            <thead>
-              <tr className="bg-indigo-100 text-indigo-800 text-center">
-                <th className="p-2 border">Date</th>
-                <th className="p-2 border">Ticker</th>
-                <th className="p-2 border">Action</th>
-                <th className="p-2 border">Buy Price</th>
-                <th className="p-2 border">Sell/Current Price</th>
-                <th className="p-2 border">Quantity</th>
-                <th className="p-2 border">Total Invested</th>
-                <th className="p-2 border">Current Value</th>
-                <th className="p-2 border">Profit</th>
-                <th className="p-2 border">Profit %</th>
-                <th className="p-2 border">Status</th>
-                {status !== 'open' && <th className="p-2 border">Reason</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {trades.map((t) => (
-                <tr key={t.id || `${t.ticker}-${t.timestamp}`} className="text-center hover:bg-gray-50">
-                  <td className="p-2 border">{new Date(t.timestamp).toLocaleDateString()}</td>
-                  <td className="p-2 border">{t.ticker}</td>
-                  <td className="p-2 border">{t.action}</td>
-                  <td className="p-2 border">₹{parseFloat(t.price).toFixed(2)}</td>
-                  <td className="p-2 border">₹{t.sell_or_current_price?.toFixed(2)}</td>
-                  <td className="p-2 border">{t.quantity || 1}</td>
-                  <td className="p-2 border">₹{t.total_invested?.toFixed(2)}</td>
-                  <td className="p-2 border">₹{t.current_value?.toFixed(2)}</td>
-                  <td className={`p-2 border ${t.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    ₹{t.profit.toFixed(2)}
-                  </td>
-                  <td className={`p-2 border ${t.profit_pct >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {t.profit_pct.toFixed(2)}%
-                  </td>
-                  <td className="p-2 border">{t.status}</td>
-                  {status !== 'open' && (
-                    <td className="p-2 border text-left text-gray-600 text-xs max-w-[200px] truncate" title={t.reason}>
-                      {t.reason || '—'}
-                    </td>
-                  )}
+        <div className="overflow-x-auto border border-gray-200 rounded-lg shadow-sm mt-4">
+          <table {...getTableProps()} className="min-w-full text-sm table-auto">
+            <thead className="bg-indigo-100 text-indigo-800">
+              {headerGroups.map((headerGroup) => (
+                <tr {...headerGroup.getHeaderGroupProps()} className="text-center">
+                  {headerGroup.headers.map((column) => (
+                    <th {...column.getHeaderProps(column.getSortByToggleProps())} className="p-2 border">
+                      {column.render('Header')}
+                      <span>
+                        {column.isSorted
+                          ? column.isSortedDesc
+                            ? ' 🔽'
+                            : ' 🔼'
+                          : ''}
+                      </span>
+                    </th>
+                  ))}
                 </tr>
               ))}
+            </thead>
+            <tbody {...getTableBodyProps()}>
+              {rows.map((row) => {
+                prepareRow(row);
+                return (
+                  <tr {...row.getRowProps()} className="text-center hover:bg-gray-50">
+                    {row.cells.map((cell) => (
+                      <td {...cell.getCellProps()} className="p-2 border">
+                        {cell.render('Cell')}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
