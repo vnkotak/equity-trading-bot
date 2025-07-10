@@ -109,7 +109,7 @@ export default function Trades() {
       }
     ];
 
-    if (status !== "open") {
+    if (status === "closed") {
       baseCols.push({
         accessorKey: "reason",
         header: () => <SortableHeader label="Reason" />,        
@@ -159,7 +159,11 @@ export default function Trades() {
               width: "calc(33.333% - 8px)",
             }}
           ></span>
-          {["open", "closed", "all"].map((opt) => (
+          {[
+            "open",
+            "closed",
+            "all"
+          ].map((opt) => (
             <button
               key={opt}
               onClick={() => setStatus(opt)}
