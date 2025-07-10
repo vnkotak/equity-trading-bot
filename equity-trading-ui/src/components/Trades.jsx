@@ -118,22 +118,38 @@ export default function Trades() {
                 <th className="p-2 border">Action</th>
                 <th className="p-2 border">Buy Price</th>
                 <th className="p-2 border">Sell/Current Price</th>
+                <th className="p-2 border">Quantity</th>
+                <th className="p-2 border">Total Invested</th>
+                <th className="p-2 border">Current Value</th>
                 <th className="p-2 border">Profit</th>
                 <th className="p-2 border">Profit %</th>
                 <th className="p-2 border">Status</th>
+                {status !== 'open' && <th className="p-2 border">Reason</th>}
               </tr>
             </thead>
             <tbody>
               {trades.map((t) => (
-                <tr key={t.id} className="text-center hover:bg-gray-50">
+                <tr key={t.id || `${t.ticker}-${t.timestamp}`} className="text-center hover:bg-gray-50">
                   <td className="p-2 border">{new Date(t.timestamp).toLocaleDateString()}</td>
                   <td className="p-2 border">{t.ticker}</td>
                   <td className="p-2 border">{t.action}</td>
                   <td className="p-2 border">₹{parseFloat(t.price).toFixed(2)}</td>
                   <td className="p-2 border">₹{t.sell_or_current_price?.toFixed(2)}</td>
-                  <td className={`p-2 border ${t.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>₹{t.profit.toFixed(2)}</td>
-                  <td className={`p-2 border ${t.profit_pct >= 0 ? 'text-green-600' : 'text-red-600'}`}>{t.profit_pct.toFixed(2)}%</td>
+                  <td className="p-2 border">{t.quantity || 1}</td>
+                  <td className="p-2 border">₹{t.total_invested?.toFixed(2)}</td>
+                  <td className="p-2 border">₹{t.current_value?.toFixed(2)}</td>
+                  <td className={`p-2 border ${t.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    ₹{t.profit.toFixed(2)}
+                  </td>
+                  <td className={`p-2 border ${t.profit_pct >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {t.profit_pct.toFixed(2)}%
+                  </td>
                   <td className="p-2 border">{t.status}</td>
+                  {status !== 'open' && (
+                    <td className="p-2 border text-left text-gray-600 text-xs max-w-[200px] truncate" title={t.reason}>
+                      {t.reason || '—'}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
