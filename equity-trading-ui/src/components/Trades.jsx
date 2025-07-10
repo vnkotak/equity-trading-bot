@@ -35,8 +35,8 @@ export default function Trades() {
     fetchTrades(status);
   }, [status]);
 
-  const columns = useMemo(
-    () => [
+  const columns = useMemo(() => {
+    const baseCols = [
       {
         accessorKey: "timestamp",
         header: "Date",
@@ -51,18 +51,12 @@ export default function Trades() {
       {
         accessorKey: "price",
         header: "Buy Price",
-        cell: (info) => {
-          const val = info.getValue();
-          return typeof val === "number" ? `₹${val.toFixed(2)}` : "-";
-        },
+        cell: (info) => `₹${(+info.getValue()).toFixed(2)}`,
       },
       {
         accessorKey: "sell_or_current_price",
         header: status === "open" ? "Current Price" : "Sell Price",
-        cell: (info) => {
-          const val = info.getValue();
-          return typeof val === "number" ? `₹${val.toFixed(2)}` : "-";
-        },
+        cell: (info) => `₹${(+info.getValue()).toFixed(2)}`,
       },
       {
         accessorKey: "quantity",
@@ -72,27 +66,20 @@ export default function Trades() {
       {
         accessorKey: "total_invested",
         header: "Invested",
-        cell: (info) => {
-          const val = info.getValue();
-          return typeof val === "number" ? `₹${val.toFixed(2)}` : "-";
-        },
+        cell: (info) => `₹${(+info.getValue()).toFixed(2)}`,
       },
       {
         accessorKey: "current_value",
         header: "Curr Value",
-        cell: (info) => {
-          const val = info.getValue();
-          return typeof val === "number" ? `₹${val.toFixed(2)}` : "-";
-        },
+        cell: (info) => `₹${(+info.getValue()).toFixed(2)}`,
       },
       {
         accessorKey: "profit",
         header: "Profit",
         cell: (info) => {
-          const val = info.getValue();
-          const num = typeof val === "number" ? val.toFixed(2) : "-";
+          const val = +info.getValue();
           return (
-            <span className={val >= 0 ? "text-green-600" : "text-red-600"}>₹{num}</span>
+            <span className={val >= 0 ? "text-green-600" : "text-red-600"}>₹{val.toFixed(2)}</span>
           );
         },
       },
@@ -100,10 +87,9 @@ export default function Trades() {
         accessorKey: "profit_pct",
         header: "Profit %",
         cell: (info) => {
-          const val = info.getValue();
-          const num = typeof val === "number" ? val.toFixed(2) : "-";
+          const val = +info.getValue();
           return (
-            <span className={val >= 0 ? "text-green-600" : "text-red-600"}>{num}%</span>
+            <span className={val >= 0 ? "text-green-600" : "text-red-600"}>{val.toFixed(2)}%</span>
           );
         },
       },
@@ -112,9 +98,18 @@ export default function Trades() {
         header: "Reason",
         cell: (info) => info.getValue() || "-",
       },
-    ],
-    [status]
-  );
+    ];
+
+    if (status === "all") {
+      baseCols.push({
+        accessorKey: "status",
+        header: "Status",
+        cell: (info) => info.getValue(),
+      });
+    }
+
+    return baseCols;
+  }, [status]);
 
   const table = useReactTable({
     data: trades,
@@ -200,7 +195,11 @@ export default function Trades() {
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
-                    <th key={header.id} className="p-2 border text-left">
+                    <th
+                      key={header.id}
+                      className="p-2 border text-left whitespace-nowrap"
+                      style={{ width: header.column.columnDef.meta?.width || "auto" }}
+                    >
                       {flexRender(header.column.columnDef.header, header.getContext())}
                     </th>
                   ))}
