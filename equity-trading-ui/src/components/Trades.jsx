@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTable, useSortBy, useGlobalFilter } from 'react-table';
-import matchSorter from 'match-sorter';
+import { matchSorter } from 'match-sorter'; 
 import { Loader2 } from 'lucide-react';
 
 export default function Trades() {
