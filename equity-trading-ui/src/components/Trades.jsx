@@ -155,7 +155,15 @@ export default function Trades() {
                   : "text-blue-800"
               }`}
             >
-              {loading ? <LoadingDots /> : key.includes("pct") ? `${summary?.[key]?.toFixed(2)}%` : `₹${summary?.[key]?.toFixed(2)}`}
+              {loading ? (
+                <LoadingDots />
+              ) : typeof summary?.[key] === "number" ? (
+                key.includes("pct")
+                  ? `${summary[key].toFixed(2)}%`
+                  : `₹${summary[key].toFixed(2)}`
+              ) : (
+                "-"
+              )}
             </p>
           </div>
         ))}
