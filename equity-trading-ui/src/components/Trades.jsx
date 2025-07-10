@@ -159,11 +159,7 @@ export default function Trades() {
               width: "calc(33.333% - 8px)",
             }}
           ></span>
-          {[
-            "open",
-            "closed",
-            "all"
-          ].map((opt) => (
+          {["open", "closed", "all"].map((opt) => (
             <button
               key={opt}
               onClick={() => setStatus(opt)}
@@ -179,7 +175,12 @@ export default function Trades() {
 
       {/* Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white p-4 rounded-xl shadow">
-        {["total_invested", "current_value", "profit", "profit_pct"].map((key) => (
+        {[
+          "total_invested",
+          "current_value",
+          "profit",
+          "profit_pct"
+        ].map((key) => (
           <div key={key} className="text-center min-h-[48px] flex flex-col justify-center">
             <p className="text-gray-500 text-sm capitalize">
               {key.replace(/_/g, " ")}
@@ -205,6 +206,34 @@ export default function Trades() {
             </p>
           </div>
         ))}
+      </div>
+
+      {/* Extra Metrics */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white p-4 rounded-xl shadow">
+        {status === "open" && (
+          <>
+            <MetricCard title="Total Buys" value={summary?.total_buy_trades} loading={loading} />
+            <MetricCard title="Open Trades" value={summary?.open_trades} loading={loading} />
+            <MetricCard title="Winning Trades" value={summary?.winning_trades} loading={loading} />
+            <MetricCard title="Winning %" value={`${summary?.winning_pct?.toFixed(2)}%`} loading={loading} />
+          </>
+        )}
+        {status === "closed" && (
+          <>
+            <MetricCard title="Total Buys" value={summary?.total_buy_trades} loading={loading} />
+            <MetricCard title="Closed Trades" value={summary?.closed_trades} loading={loading} />
+            <MetricCard title="Winning Trades" value={summary?.winning_trades} loading={loading} />
+            <MetricCard title="Winning %" value={`${summary?.winning_pct?.toFixed(2)}%`} loading={loading} />
+          </>
+        )}
+        {status === "all" && (
+          <>
+            <MetricCard title="Open Trades" value={summary?.open_trades} loading={loading} />
+            <MetricCard title="Closed Trades" value={summary?.closed_trades} loading={loading} />
+            <MetricCard title="Winning Trades" value={summary?.winning_trades} loading={loading} />
+            <MetricCard title="Winning %" value={`${summary?.winning_pct?.toFixed(2)}%`} loading={loading} />
+          </>
+        )}
       </div>
 
       {/* Table */}
@@ -271,6 +300,17 @@ export default function Trades() {
 
 function SortableHeader({ label }) {
   return <span className="font-medium text-sm">{label}</span>;
+}
+
+function MetricCard({ title, value, loading }) {
+  return (
+    <div className="text-center min-h-[48px] flex flex-col justify-center">
+      <p className="text-gray-500 text-sm">{title}</p>
+      <p className="text-lg font-bold text-indigo-700">
+        {loading ? <LoadingDots /> : value}
+      </p>
+    </div>
+  );
 }
 
 function LoadingDots() {
