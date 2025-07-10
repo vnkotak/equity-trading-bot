@@ -24,14 +24,19 @@ export default function App() {
       const tickers = metaData.tickers || [];
       setTotal(tickers.length);
 
+      console.log("✅ Response for", tickers); 
+
+
       for (let i = 0; i < tickers.length; i++) {
         const ticker = tickers[i];
         setCurrentTicker(ticker);
+        console.log("✅ Fetching Log for", ticker); 
 
         try {
           const stockRes = await fetch(`https://fastapi-trading-bot-1.onrender.com/screener-stock?ticker=${ticker}`);
           const stockData = await stockRes.json();
 
+          console.log("✅ Stock Log for", stockData); 
           if (
             stockData &&
             stockData.history &&
