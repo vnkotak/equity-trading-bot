@@ -39,72 +39,91 @@ export default function Trades() {
     const baseCols = [
       {
         accessorKey: "timestamp",
-        header: "Date",
+        header: () => <SortableHeader label="Date" />,        
         cell: (info) => new Date(info.getValue()).toLocaleDateString(),
+        enableColumnFilter: true
       },
       {
         accessorKey: "ticker",
-        header: "Ticker",
+        header: () => <SortableHeader label="Ticker" />,        
         cell: (info) => info.getValue(),
-        filterFn: "includesString",
+        enableColumnFilter: true
       },
       {
         accessorKey: "price",
-        header: "Buy Price",
+        header: () => <SortableHeader label="Buy Price" />,        
         cell: (info) => `₹${(+info.getValue()).toFixed(2)}`,
+        enableColumnFilter: true
       },
       {
         accessorKey: "sell_or_current_price",
-        header: status === "open" ? "Current Price" : "Sell Price",
+        header: () => (
+          <SortableHeader label={status === "open" ? "Current Price" : "Sell Price"} />
+        ),
         cell: (info) => `₹${(+info.getValue()).toFixed(2)}`,
+        enableColumnFilter: true
       },
       {
         accessorKey: "quantity",
-        header: "Qty",
+        header: () => <SortableHeader label="Qty" />,        
         cell: (info) => info.getValue(),
+        enableColumnFilter: true
       },
       {
         accessorKey: "total_invested",
-        header: "Invested",
+        header: () => <SortableHeader label="Invested" />,        
         cell: (info) => `₹${(+info.getValue()).toFixed(2)}`,
+        enableColumnFilter: true
       },
       {
         accessorKey: "current_value",
-        header: "Curr Value",
+        header: () => <SortableHeader label="Curr Value" />,        
         cell: (info) => `₹${(+info.getValue()).toFixed(2)}`,
+        enableColumnFilter: true
       },
       {
         accessorKey: "profit",
-        header: "Profit",
+        header: () => <SortableHeader label="Profit" />,        
         cell: (info) => {
           const val = +info.getValue();
           return (
-            <span className={val >= 0 ? "text-green-600" : "text-red-600"}>₹{val.toFixed(2)}</span>
+            <span className={val >= 0 ? "text-green-600" : "text-red-600"}>
+              ₹{val.toFixed(2)}
+            </span>
           );
         },
+        enableColumnFilter: true
       },
       {
         accessorKey: "profit_pct",
-        header: "Profit %",
+        header: () => <SortableHeader label="Profit %" />,        
         cell: (info) => {
           const val = +info.getValue();
           return (
-            <span className={val >= 0 ? "text-green-600" : "text-red-600"}>{val.toFixed(2)}%</span>
+            <span className={val >= 0 ? "text-green-600" : "text-red-600"}>
+              {val.toFixed(2)}%
+            </span>
           );
         },
-      },
-      {
-        accessorKey: "reason",
-        header: "Reason",
-        cell: (info) => info.getValue() || "-",
-      },
+        enableColumnFilter: true
+      }
     ];
+
+    if (status !== "open") {
+      baseCols.push({
+        accessorKey: "reason",
+        header: () => <SortableHeader label="Reason" />,        
+        cell: (info) => info.getValue() || "-",
+        enableColumnFilter: true
+      });
+    }
 
     if (status === "all") {
       baseCols.push({
         accessorKey: "status",
-        header: "Status",
+        header: () => <SortableHeader label="Status" />,        
         cell: (info) => info.getValue(),
+        enableColumnFilter: true
       });
     }
 
@@ -117,14 +136,15 @@ export default function Trades() {
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    state: {},
   });
 
   return (
     <div className="p-4 space-y-6">
-      <h1 className="text-2xl font-bold text-indigo-700 text-center">💼 Trades Dashboard</h1>
+      <h1 className="text-2xl font-bold text-indigo-700 text-center">
+        💼 Trades Dashboard
+      </h1>
 
-      {/* Toggle Tabs */}
+      {/* Tabs */}
       <div className="relative w-full max-w-sm mx-auto">
         <div className="grid grid-cols-3 bg-gray-200 rounded-full shadow-inner p-1 relative">
           <span
@@ -153,11 +173,13 @@ export default function Trades() {
         </div>
       </div>
 
-      {/* Summary Cards */}
+      {/* Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white p-4 rounded-xl shadow">
         {["total_invested", "current_value", "profit", "profit_pct"].map((key) => (
           <div key={key} className="text-center min-h-[48px] flex flex-col justify-center">
-            <p className="text-gray-500 text-sm capitalize">{key.replace(/_/g, " ")}</p>
+            <p className="text-gray-500 text-sm capitalize">
+              {key.replace(/_/g, " ")}
+            </p>
             <p
               className={`text-lg font-bold ${
                 key.includes("profit")
@@ -181,7 +203,7 @@ export default function Trades() {
         ))}
       </div>
 
-      {/* Trades Table */}
+      {/* Table */}
       {loading ? (
         <div className="flex justify-center items-center py-6">
           <Loader2 className="animate-spin w-6 h-6 text-gray-500" />
@@ -195,12 +217,31 @@ export default function Trades() {
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      className="p-2 border text-left whitespace-nowrap"
-                      style={{ width: header.column.columnDef.meta?.width || "auto" }}
-                    >
-                      {flexRender(header.column.columnDef.header, header.getContext())}
+                    <th key={header.id} className="p-2 border text-left w-32">
+                      <div
+                        className="cursor-pointer select-none"
+                        onClick={header.column.getToggleSortingHandler()}
+                      >
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                        {header.column.getIsSorted() === "asc"
+                          ? " ↑"
+                          : header.column.getIsSorted() === "desc"
+                          ? " ↓"
+                          : ""}
+                      </div>
+                      {header.column.getCanFilter() ? (
+                        <div>
+                          <input
+                            type="text"
+                            onChange={(e) =>
+                              header.column.setFilterValue(e.target.value)
+                            }
+                            value={header.column.getFilterValue() ?? ""}
+                            placeholder="Filter..."
+                            className="mt-1 block w-full px-2 py-1 text-xs border rounded"
+                          />
+                        </div>
+                      ) : null}
                     </th>
                   ))}
                 </tr>
@@ -208,7 +249,7 @@ export default function Trades() {
             </thead>
             <tbody>
               {table.getRowModel().rows.map((row) => (
-                <tr key={row.id} className="hover:bg-gray-50">
+                <tr key={row.id} className="hover:bg-gray-50 even:bg-gray-50">
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="p-2 border text-left">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -222,6 +263,10 @@ export default function Trades() {
       )}
     </div>
   );
+}
+
+function SortableHeader({ label }) {
+  return <span className="font-medium text-sm">{label}</span>;
 }
 
 function LoadingDots() {
