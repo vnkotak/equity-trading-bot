@@ -1,16 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Screener from './components/Screener';
 import Trades from './components/Trades';
 
 export default function App() {
   const [view, setView] = useState('screener');
 
-  // Screener states lifted to App
+  // Screener states
   const [stocks, setStocks] = useState([]);
   const [progress, setProgress] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
   const [currentTicker, setCurrentTicker] = useState('');
+
+  const isMounted = useRef(true);
+  useEffect(() => {
+    return () => {
+      isMounted.current = false; // when unmounted
+    };
+  }, []);
 
   const fetchAllStocks = async () => {
     setProgress(0);
@@ -20,50 +27,44 @@ export default function App() {
 
     try {
       const metaRes = await fetch('https://fastapi-trading-bot-1.onrender.com/screener-meta');
-      const metaData = await metaRes.json();
-      const tickers = metaData.tickers || [];
+      const tickers = await metaRes.json();
       setTotal(tickers.length);
-
-      console.log("✅ Response for", tickers); 
-
 
       for (let i = 0; i < tickers.length; i++) {
         const ticker = tickers[i];
-        setCurrentTicker(ticker);
-        console.log("✅ Fetching Log for", ticker); 
+        isMounted.current && setCurrentTicker(ticker);
 
         try {
-          const stockRes = await fetch(`https://fastapi-trading-bot-1.onrender.com/screener-stock?ticker=${ticker}`);
-          const stockData = await stockRes.json();
+          const res = await fetch(`https://fastapi-trading-bot-1.onrender.com/screener-stock?ticker=${ticker}`);
+          const data = await res.json();
 
-          console.log("✅ Stock Log for", stockData); 
           if (
-            stockData &&
-            stockData.history &&
-            stockData.history.length > 0 &&
-            stockData.match_type === 'full'
+            data &&
+            data.history &&
+            data.history.length > 0 &&
+            data.match_type === 'full'
           ) {
-            setStocks((prev) => {
-              if (prev.find((s) => s.ticker === stockData.ticker)) return prev;
-              return [...prev, stockData];
-            });
+            isMounted.current &&
+              setStocks((prev) => {
+                if (prev.find((s) => s.ticker === data.ticker)) return prev;
+                return [...prev, data];
+              });
           }
         } catch (err) {
-          console.warn(`⚠️ Failed to fetch ${ticker}`);
+          console.warn(`❌ Failed to fetch ${ticker}`);
         }
 
-        setProgress(Math.round(((i + 1) / tickers.length) * 100));
+        isMounted.current && setProgress(Math.round(((i + 1) / tickers.length) * 100));
       }
     } catch (err) {
-      console.error('❌ Error in fetching screener meta:', err);
+      console.error('❌ Screener meta error:', err);
     } finally {
-      setLoading(false);
+      isMounted.current && setLoading(false);
     }
   };
 
-  // Run fetch only once on mount
   useEffect(() => {
-    fetchAllStocks();
+    fetchAllStocks(); // load on mount
   }, []);
 
   return (
@@ -72,7 +73,7 @@ export default function App() {
         📈 NSE Equity Dashboard
       </h1>
 
-      {/* Toggle: Screener / Trades */}
+      {/* Toggle Tabs */}
       <div className="relative w-full max-w-xs mx-auto mt-4">
         <div className="grid grid-cols-2 bg-gray-200 rounded-full shadow-inner p-1 relative">
           <span
@@ -97,12 +98,12 @@ export default function App() {
         </div>
       </div>
 
-      {/* Conditional Rendering */}
+      {/* Render Active Tab */}
       {view === 'screener' ? (
         <Screener
           stocks={stocks}
-          loading={loading}
           progress={progress}
+          loading={loading}
           total={total}
           currentTicker={currentTicker}
           fetchAllStocks={fetchAllStocks}
