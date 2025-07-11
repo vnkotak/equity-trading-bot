@@ -27,16 +27,25 @@ export default function App() {
 
     try {
       const metaRes = await fetch('https://fastapi-trading-bot-1.onrender.com/screener-meta');
-      const tickers = await metaRes.json();
+      const metaData = await metaRes.json();
+
+      // 🛠 Fix for plain array or { tickers: [...] }
+      const tickers = Array.isArray(metaData) ? metaData : metaData.tickers || [];
+
+      console.log(`📦 Tickers received: ${tickers.length}`);
       setTotal(tickers.length);
 
       for (let i = 0; i < tickers.length; i++) {
         const ticker = tickers[i];
-        isMounted.current && setCurrentTicker(ticker);
+        if (!isMounted.current) break;
+
+        setCurrentTicker(ticker);
+        console.log(`🔍 Fetching: ${ticker}`);
 
         try {
           const res = await fetch(`https://fastapi-trading-bot-1.onrender.com/screener-stock?ticker=${ticker}`);
           const data = await res.json();
+          console.log(`✅ Response for ${ticker}:`, data);
 
           if (
             data &&
@@ -44,22 +53,23 @@ export default function App() {
             data.history.length > 0 &&
             data.match_type === 'full'
           ) {
-            isMounted.current &&
-              setStocks((prev) => {
-                if (prev.find((s) => s.ticker === data.ticker)) return prev;
-                return [...prev, data];
-              });
+            setStocks((prev) => {
+              if (prev.find((s) => s.ticker === data.ticker)) return prev;
+              return [...prev, data];
+            });
+          } else {
+            console.log(`⚠️ ${ticker} did not match`);
           }
         } catch (err) {
-          console.warn(`❌ Failed to fetch ${ticker}`);
+          console.warn(`❌ Error fetching ${ticker}:`, err);
         }
 
-        isMounted.current && setProgress(Math.round(((i + 1) / tickers.length) * 100));
+        setProgress(Math.round(((i + 1) / tickers.length) * 100));
       }
     } catch (err) {
-      console.error('❌ Screener meta error:', err);
+      console.error('❌ Error in screener-meta:', err);
     } finally {
-      isMounted.current && setLoading(false);
+      if (isMounted.current) setLoading(false);
     }
   };
 
