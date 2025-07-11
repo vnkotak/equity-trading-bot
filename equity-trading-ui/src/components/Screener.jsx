@@ -1,18 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import PlotlyStockCard from './PlotlyStockCard';
 import { RotateCw } from 'lucide-react';
 
 export default function Screener({ stocks, progress, loading, total, currentTicker, fetchAllStocks }) {
-  const isInitialMount = useRef(true);
-
-  useEffect(() => {
-    // Only fetch on initial mount
-    if (isInitialMount.current) {
-      fetchAllStocks();
-      isInitialMount.current = false;
-    }
-  }, [fetchAllStocks]);
-
   return (
     <>
       {loading && (
