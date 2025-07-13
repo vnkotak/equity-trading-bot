@@ -46,14 +46,14 @@ export default function App() {
           const res = await fetch(`https://fastapi-trading-bot-1.onrender.com/screener-stock?ticker=${ticker}`);
           const data = await res.json();
           console.log(`✅ Response for ${ticker}:`, data);
-          alert(data);
+          //alert(data);
           if (
             data &&
             data.history &&
             data.history.length > 0
             // data.match_type === 'full'
           ) {
-            alert("1");
+            //alert("1");
             setStocks((prev) => {
               if (prev.find((s) => s.ticker === data.ticker)) return prev;
               return [...prev, data];
