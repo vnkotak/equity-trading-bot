@@ -50,8 +50,8 @@ export default function App() {
           if (
             data &&
             data.history &&
-            data.history.length > 0 &&
-            data.match_type === 'full'
+            data.history.length > 0
+            # data.match_type === 'full'
           ) {
             setStocks((prev) => {
               if (prev.find((s) => s.ticker === data.ticker)) return prev;
