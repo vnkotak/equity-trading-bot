@@ -132,12 +132,14 @@ export default function App() {
       {view === 'screener' && (
         <div className="flex flex-col items-center gap-6 mt-6">
           {!loading && !isPaused && !stocks.length && !isStopped && (
-            <button
-              className="bg-indigo-600 text-white px-6 py-4 text-lg font-bold rounded-2xl shadow-md hover:bg-indigo-700 transition"
-              onClick={fetchAllStocks}
-            >
-              🚀 Screen Stocks
-            </button>
+            <div className="flex justify-center items-center min-h-[60vh] w-full">
+              <button
+                className="bg-indigo-600 text-white px-6 py-4 text-lg font-bold rounded-2xl shadow-md hover:bg-indigo-700 transition"
+                onClick={fetchAllStocks}
+              >
+                🚀 Screen Stocks
+              </button>
+            </div>
           )}
 
           {(loading || isPaused) && !isStopped && (
