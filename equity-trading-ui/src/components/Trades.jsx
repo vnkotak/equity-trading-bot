@@ -322,4 +322,15 @@ function MetricCard({ title, value, loading }) {
         {loading ? <LoadingDots /> : value}
       </p>
     </div>
-  )
+  );
+}
+
+function LoadingDots() {
+  return (
+    <div className="flex justify-center items-center gap-[4px] h-[20px] mt-1">
+      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.2s]" />
+      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.1s]" />
+      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" />
+    </div>
+  );
+}
