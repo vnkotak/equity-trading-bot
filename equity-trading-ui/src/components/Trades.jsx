@@ -7,7 +7,6 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import { Loader2 } from "lucide-react";
-import matchSorter from "match-sorter";
 
 export default function Trades() {
   const [trades, setTrades] = useState([]);
@@ -22,7 +21,27 @@ export default function Trades() {
         `https://fastapi-trading-bot-1.onrender.com/trades-summary?status=${filter}`
       );
       const data = await res.json();
-      setTrades(data.trades || []);
+
+      const enhancedTrades = (data.trades || []).map((trade) => {
+        if (trade.status === "CLOSED" && trade.timestamp && trade.reason) {
+          const matchedSell = (data.trades || []).find(
+            (t) =>
+              t.action === "SELL" &&
+              t.ticker === trade.ticker &&
+              new Date(t.timestamp) > new Date(trade.timestamp)
+          );
+          if (matchedSell) {
+            trade.sell_timestamp = matchedSell.timestamp;
+            trade.days_held = Math.round(
+              (new Date(matchedSell.timestamp) - new Date(trade.timestamp)) /
+                (1000 * 60 * 60 * 24)
+            );
+          }
+        }
+        return trade;
+      });
+
+      setTrades(enhancedTrades);
       setSummary(data.summary || null);
     } catch (err) {
       console.error("Failed to fetch trades:", err);
@@ -39,51 +58,54 @@ export default function Trades() {
     const baseCols = [
       {
         accessorKey: "timestamp",
-        header: () => <SortableHeader label="Date" />,        
-        cell: (info) => new Date(info.getValue()).toLocaleDateString(),
-        enableColumnFilter: true
+        header: () => <SortableHeader label="Buy Date" />,
+        cell: (info) =>
+          new Date(info.getValue()).toLocaleDateString("en-IN"),
+        enableColumnFilter: true,
       },
       {
         accessorKey: "ticker",
-        header: () => <SortableHeader label="Ticker" />,        
+        header: () => <SortableHeader label="Ticker" />,
         cell: (info) => info.getValue(),
-        enableColumnFilter: true
+        enableColumnFilter: true,
       },
       {
         accessorKey: "price",
-        header: () => <SortableHeader label="Buy Price" />,        
+        header: () => <SortableHeader label="Buy Price" />,
         cell: (info) => `₹${(+info.getValue()).toFixed(2)}`,
-        enableColumnFilter: true
+        enableColumnFilter: true,
       },
       {
         accessorKey: "sell_or_current_price",
         header: () => (
-          <SortableHeader label={status === "open" ? "Current Price" : "Sell Price"} />
+          <SortableHeader
+            label={status === "open" ? "Current Price" : "Sell Price"}
+          />
         ),
         cell: (info) => `₹${(+info.getValue()).toFixed(2)}`,
-        enableColumnFilter: true
+        enableColumnFilter: true,
       },
       {
         accessorKey: "quantity",
-        header: () => <SortableHeader label="Qty" />,        
+        header: () => <SortableHeader label="Qty" />,
         cell: (info) => info.getValue(),
-        enableColumnFilter: true
+        enableColumnFilter: true,
       },
       {
         accessorKey: "total_invested",
-        header: () => <SortableHeader label="Invested" />,        
+        header: () => <SortableHeader label="Invested" />,
         cell: (info) => `₹${(+info.getValue()).toFixed(2)}`,
-        enableColumnFilter: true
+        enableColumnFilter: true,
       },
       {
         accessorKey: "current_value",
-        header: () => <SortableHeader label="Curr Value" />,        
+        header: () => <SortableHeader label="Curr Value" />,
         cell: (info) => `₹${(+info.getValue()).toFixed(2)}`,
-        enableColumnFilter: true
+        enableColumnFilter: true,
       },
       {
         accessorKey: "profit",
-        header: () => <SortableHeader label="Profit" />,        
+        header: () => <SortableHeader label="Profit" />,
         cell: (info) => {
           const val = +info.getValue();
           return (
@@ -92,11 +114,11 @@ export default function Trades() {
             </span>
           );
         },
-        enableColumnFilter: true
+        enableColumnFilter: true,
       },
       {
         accessorKey: "profit_pct",
-        header: () => <SortableHeader label="Profit %" />,        
+        header: () => <SortableHeader label="Profit %" />,
         cell: (info) => {
           const val = +info.getValue();
           return (
@@ -105,25 +127,45 @@ export default function Trades() {
             </span>
           );
         },
-        enableColumnFilter: true
-      }
+        enableColumnFilter: true,
+      },
     ];
 
     if (status === "closed") {
-      baseCols.push({
-        accessorKey: "reason",
-        header: () => <SortableHeader label="Reason" />,        
-        cell: (info) => info.getValue() || "-",
-        enableColumnFilter: true
-      });
+      baseCols.push(
+        {
+          accessorKey: "sell_date",
+          header: () => <SortableHeader label="Sell Date" />,
+          cell: (info) => {
+            const sellDate = info.row.original.sell_timestamp;
+            return sellDate
+              ? new Date(sellDate).toLocaleDateString("en-IN")
+              : "-";
+          },
+        },
+        {
+          accessorKey: "days_held",
+          header: () => <SortableHeader label="Days Held" />,
+          cell: (info) => {
+            const val = info.row.original.days_held;
+            return typeof val === "number" ? `${val} day(s)` : "-";
+          },
+        },
+        {
+          accessorKey: "reason",
+          header: () => <SortableHeader label="Reason" />,
+          cell: (info) => info.getValue() || "-",
+          enableColumnFilter: true,
+        }
+      );
     }
 
     if (status === "all") {
       baseCols.push({
         accessorKey: "status",
-        header: () => <SortableHeader label="Status" />,        
+        header: () => <SortableHeader label="Status" />,
         cell: (info) => info.getValue(),
-        enableColumnFilter: true
+        enableColumnFilter: true,
       });
     }
 
@@ -173,38 +215,10 @@ export default function Trades() {
         </div>
       </div>
 
-      {/* Summary */}
+      {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white p-4 rounded-xl shadow">
-        {[
-          "total_invested",
-          "current_value",
-          "profit",
-          "profit_pct"
-        ].map((key) => (
-          <div key={key} className="text-center min-h-[48px] flex flex-col justify-center">
-            <p className="text-gray-500 text-sm capitalize">
-              {key.replace(/_/g, " ")}
-            </p>
-            <p
-              className={`text-lg font-bold ${
-                key.includes("profit")
-                  ? summary?.[key] >= 0
-                    ? "text-green-600"
-                    : "text-red-600"
-                  : "text-blue-800"
-              }`}
-            >
-              {loading ? (
-                <LoadingDots />
-              ) : typeof summary?.[key] === "number" ? (
-                key.includes("pct")
-                  ? `${summary[key].toFixed(2)}%`
-                  : `₹${summary[key].toFixed(2)}`
-              ) : (
-                "-"
-              )}
-            </p>
-          </div>
+        {["total_invested", "current_value", "profit", "profit_pct"].map((key) => (
+          <MetricCard key={key} title={key.replace(/_/g, " ")} value={summary?.[key]} loading={loading} />
         ))}
       </div>
 
@@ -262,19 +276,17 @@ export default function Trades() {
                           ? " ↓"
                           : ""}
                       </div>
-                      {header.column.getCanFilter() ? (
-                        <div>
-                          <input
-                            type="text"
-                            onChange={(e) =>
-                              header.column.setFilterValue(e.target.value)
-                            }
-                            value={header.column.getFilterValue() ?? ""}
-                            placeholder="Filter..."
-                            className="mt-1 block w-full px-2 py-1 text-xs border rounded"
-                          />
-                        </div>
-                      ) : null}
+                      {header.column.getCanFilter() && (
+                        <input
+                          type="text"
+                          onChange={(e) =>
+                            header.column.setFilterValue(e.target.value)
+                          }
+                          value={header.column.getFilterValue() ?? ""}
+                          placeholder="Filter..."
+                          className="mt-1 block w-full px-2 py-1 text-xs border rounded"
+                        />
+                      )}
                     </th>
                   ))}
                 </tr>
@@ -310,15 +322,4 @@ function MetricCard({ title, value, loading }) {
         {loading ? <LoadingDots /> : value}
       </p>
     </div>
-  );
-}
-
-function LoadingDots() {
-  return (
-    <div className="flex justify-center items-center gap-[4px] h-[20px] mt-1">
-      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.2s]" />
-      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.1s]" />
-      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" />
-    </div>
-  );
-}
+  )
