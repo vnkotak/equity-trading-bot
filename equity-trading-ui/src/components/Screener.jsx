@@ -14,7 +14,8 @@ export default function Screener({
 }) {
   return (
     <>
-      {(loading || isPaused) && (
+      {/* Progress section: Hide if stopped */}
+      {(loading || isPaused) && !isStopped && (
         <div className="text-center space-y-3 animate-fade-in">
           <p className="text-lg font-medium text-gray-700">
             Scanning {currentTicker || 'stocks'}... {progress}%
@@ -31,9 +32,9 @@ export default function Screener({
         </div>
       )}
 
-      {/* ✅ Show message only when: not loading, not paused, not stopped, progress complete */}
-      {!loading && !isPaused && !isStopped && progress === 100 && stocks.length === 0 && (
-        <p className="text-center text-red-600 font-semibold text-lg">
+      {/* Message for "No Stocks Found" after stop or full scan */}
+      {!loading && stocks.length === 0 && (isStopped || progress === 100) && (
+        <p className="text-center text-red-600 font-semibold text-lg mt-6">
           🚫 No stocks found matching criteria.
         </p>
       )}
