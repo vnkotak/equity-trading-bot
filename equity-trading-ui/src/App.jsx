@@ -131,7 +131,7 @@ export default function App() {
       {/* Screener Controls */}
       {view === 'screener' && (
         <div className="flex flex-col items-center gap-6 mt-6">
-          {!loading && !isPaused && !stocks.length && (
+          {!loading && !isPaused && !stocks.length && !isStopped && (
             <button
               className="bg-indigo-600 text-white px-6 py-4 text-lg font-bold rounded-2xl shadow-md hover:bg-indigo-700 transition"
               onClick={fetchAllStocks}
@@ -140,17 +140,21 @@ export default function App() {
             </button>
           )}
 
-          {(loading || isPaused) && (
+          {(loading || isPaused) && !isStopped && (
             <div className="flex gap-4 flex-wrap justify-center">
               <button
-                className="bg-yellow-500 text-white px-4 py-2 rounded-full shadow hover:bg-yellow-600 transition"
+                className={`px-4 py-2 rounded-full font-semibold shadow hover:scale-105 transition
+                  ${isPaused
+                    ? 'bg-sky-500 hover:bg-sky-600 text-white'
+                    : 'bg-amber-400 hover:bg-amber-500 text-black'}
+                `}
                 onClick={handlePauseToggle}
               >
                 {isPaused ? '▶️ Start' : '⏸️ Pause'}
               </button>
 
               <button
-                className="bg-red-500 text-white px-4 py-2 rounded-full shadow hover:bg-red-600 transition"
+                className="bg-rose-400 hover:bg-rose-500 text-white px-4 py-2 rounded-full shadow hover:scale-105 transition"
                 onClick={handleStop}
               >
                 ⏹️ Stop
@@ -169,7 +173,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Main Tab View */}
+      {/* Render Active Tab */}
       {view === 'screener' ? (
         <Screener
           stocks={stocks}
