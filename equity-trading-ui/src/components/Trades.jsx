@@ -7,6 +7,7 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import { Loader2 } from "lucide-react";
+import matchSorter from "match-sorter";
 
 export default function Trades() {
   const [trades, setTrades] = useState([]);
@@ -23,20 +24,18 @@ export default function Trades() {
       const data = await res.json();
 
       const enhancedTrades = (data.trades || []).map((trade) => {
-        if (trade.status === "CLOSED" && trade.timestamp && trade.reason) {
-          const matchedSell = (data.trades || []).find(
-            (t) =>
-              t.action === "SELL" &&
-              t.ticker === trade.ticker &&
-              new Date(t.timestamp) > new Date(trade.timestamp)
+        if (trade.status === "CLOSED" && trade.timestamp && trade.sell_or_current_price) {
+          const buyDate = new Date(trade.timestamp);
+          const sellDate = new Date(trade.sell_timestamp || trade.timestamp);
+          const daysHeld = Math.max(
+            1,
+            Math.floor((sellDate - buyDate) / (1000 * 60 * 60 * 24))
           );
-          if (matchedSell) {
-            trade.sell_timestamp = matchedSell.timestamp;
-            trade.days_held = Math.round(
-              (new Date(matchedSell.timestamp) - new Date(trade.timestamp)) /
-                (1000 * 60 * 60 * 24)
-            );
-          }
+          return {
+            ...trade,
+            sell_date: sellDate.toISOString(),
+            days_held: daysHeld,
+          };
         }
         return trade;
       });
@@ -59,8 +58,7 @@ export default function Trades() {
       {
         accessorKey: "timestamp",
         header: () => <SortableHeader label="Buy Date" />,
-        cell: (info) =>
-          new Date(info.getValue()).toLocaleDateString("en-IN"),
+        cell: (info) => new Date(info.getValue()).toLocaleDateString(),
         enableColumnFilter: true,
       },
       {
@@ -78,9 +76,7 @@ export default function Trades() {
       {
         accessorKey: "sell_or_current_price",
         header: () => (
-          <SortableHeader
-            label={status === "open" ? "Current Price" : "Sell Price"}
-          />
+          <SortableHeader label={status === "open" ? "Current Price" : "Sell Price"} />
         ),
         cell: (info) => `₹${(+info.getValue()).toFixed(2)}`,
         enableColumnFilter: true,
@@ -136,20 +132,17 @@ export default function Trades() {
         {
           accessorKey: "sell_date",
           header: () => <SortableHeader label="Sell Date" />,
-          cell: (info) => {
-            const sellDate = info.row.original.sell_timestamp;
-            return sellDate
-              ? new Date(sellDate).toLocaleDateString("en-IN")
-              : "-";
-          },
+          cell: (info) =>
+            info.getValue()
+              ? new Date(info.getValue()).toLocaleDateString()
+              : "-",
+          enableColumnFilter: false,
         },
         {
           accessorKey: "days_held",
           header: () => <SortableHeader label="Days Held" />,
-          cell: (info) => {
-            const val = info.row.original.days_held;
-            return typeof val === "number" ? `${val} day(s)` : "-";
-          },
+          cell: (info) => info.getValue(),
+          enableColumnFilter: false,
         },
         {
           accessorKey: "reason",
@@ -218,7 +211,18 @@ export default function Trades() {
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white p-4 rounded-xl shadow">
         {["total_invested", "current_value", "profit", "profit_pct"].map((key) => (
-          <MetricCard key={key} title={key.replace(/_/g, " ")} value={summary?.[key]} loading={loading} />
+          <MetricCard
+            key={key}
+            title={key.replace(/_/g, " ")}
+            value={
+              typeof summary?.[key] === "number"
+                ? key.includes("pct")
+                  ? `${summary[key].toFixed(2)}%`
+                  : `₹${summary[key].toFixed(2)}`
+                : "-"
+            }
+            loading={loading}
+          />
         ))}
       </div>
 
@@ -276,17 +280,19 @@ export default function Trades() {
                           ? " ↓"
                           : ""}
                       </div>
-                      {header.column.getCanFilter() && (
-                        <input
-                          type="text"
-                          onChange={(e) =>
-                            header.column.setFilterValue(e.target.value)
-                          }
-                          value={header.column.getFilterValue() ?? ""}
-                          placeholder="Filter..."
-                          className="mt-1 block w-full px-2 py-1 text-xs border rounded"
-                        />
-                      )}
+                      {header.column.getCanFilter() ? (
+                        <div>
+                          <input
+                            type="text"
+                            onChange={(e) =>
+                              header.column.setFilterValue(e.target.value)
+                            }
+                            value={header.column.getFilterValue() ?? ""}
+                            placeholder="Filter..."
+                            className="mt-1 block w-full px-2 py-1 text-xs border rounded"
+                          />
+                        </div>
+                      ) : null}
                     </th>
                   ))}
                 </tr>
