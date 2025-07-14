@@ -5,7 +5,6 @@ import Trades from './components/Trades';
 export default function App() {
   const [view, setView] = useState('screener');
 
-  // Screener states
   const [stocks, setStocks] = useState([]);
   const [progress, setProgress] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -16,11 +15,22 @@ export default function App() {
   const [isStopped, setIsStopped] = useState(false);
 
   const isMounted = useRef(true);
+  const pauseRef = useRef(false);
+  const stopRef = useRef(false);
+
   useEffect(() => {
     return () => {
       isMounted.current = false;
     };
   }, []);
+
+  useEffect(() => {
+    pauseRef.current = isPaused;
+  }, [isPaused]);
+
+  useEffect(() => {
+    stopRef.current = isStopped;
+  }, [isStopped]);
 
   const fetchAllStocks = async () => {
     setProgress(0);
@@ -28,6 +38,8 @@ export default function App() {
     setLoading(true);
     setIsPaused(false);
     setIsStopped(false);
+    pauseRef.current = false;
+    stopRef.current = false;
     setStocks([]);
 
     try {
@@ -38,12 +50,11 @@ export default function App() {
       setTotal(tickers.length);
 
       for (let i = 0; i < tickers.length; i++) {
-        if (!isMounted.current || isStopped) break;
+        if (!isMounted.current || stopRef.current) break;
 
-        // Wait if paused
-        while (isPaused) {
+        while (pauseRef.current) {
           await new Promise(resolve => setTimeout(resolve, 500));
-          if (isStopped) break;
+          if (stopRef.current) break;
         }
 
         const ticker = tickers[i];
@@ -78,6 +89,7 @@ export default function App() {
 
   const handleStop = () => {
     setIsStopped(true);
+    stopRef.current = true;
     setLoading(false);
   };
 
@@ -116,20 +128,20 @@ export default function App() {
         </div>
       </div>
 
-      {/* Buttons */}
+      {/* Screener Controls */}
       {view === 'screener' && (
-        <div className="flex justify-center gap-4 flex-wrap">
+        <div className="flex flex-col items-center gap-6 mt-6">
           {!loading && !isPaused && !stocks.length && (
             <button
-              className="bg-indigo-600 text-white px-4 py-2 rounded-full shadow hover:bg-indigo-700 transition"
+              className="bg-indigo-600 text-white px-6 py-4 text-lg font-bold rounded-2xl shadow-md hover:bg-indigo-700 transition"
               onClick={fetchAllStocks}
             >
-              🧪 Screen Stocks
+              🚀 Screen Stocks
             </button>
           )}
 
           {(loading || isPaused) && (
-            <>
+            <div className="flex gap-4 flex-wrap justify-center">
               <button
                 className="bg-yellow-500 text-white px-4 py-2 rounded-full shadow hover:bg-yellow-600 transition"
                 onClick={handlePauseToggle}
@@ -143,7 +155,7 @@ export default function App() {
               >
                 ⏹️ Stop
               </button>
-            </>
+            </div>
           )}
 
           {stocks.length > 0 && (
@@ -157,20 +169,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Progress */}
-      {(loading || isPaused) && (
-        <div className="text-center text-sm text-gray-600 mt-4">
-          Loading: {progress}% — {currentTicker}
-          <div className="w-full max-w-xl mx-auto h-2 mt-2 bg-gray-200 rounded">
-            <div
-              className="h-full bg-green-500 rounded transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
-        </div>
-      )}
-
-      {/* Render Active Tab */}
+      {/* Main Tab View */}
       {view === 'screener' ? (
         <Screener
           stocks={stocks}
@@ -179,6 +178,8 @@ export default function App() {
           total={total}
           currentTicker={currentTicker}
           fetchAllStocks={fetchAllStocks}
+          isPaused={isPaused}
+          isStopped={isStopped}
         />
       ) : (
         <Trades />
