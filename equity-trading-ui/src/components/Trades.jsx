@@ -13,6 +13,8 @@ export default function Trades() {
   const [summary, setSummary] = useState(null);
   const [status, setStatus] = useState("open");
   const [loading, setLoading] = useState(false);
+  const [topGainerId, setTopGainerId] = useState(null);
+  const [topLoserId, setTopLoserId] = useState(null);
 
   const fetchTrades = async (filter) => {
     setLoading(true);
@@ -22,8 +24,12 @@ export default function Trades() {
       );
       const data = await res.json();
 
-      const enhancedTrades = (data.trades || []).map((trade) => {
-        if (trade.status === "CLOSED" && trade.timestamp && trade.sell_timestamp) {
+      const enhancedTrades = (data.trades || []).map((trade, index) => {
+        if (
+          trade.status === "CLOSED" &&
+          trade.timestamp &&
+          trade.sell_timestamp
+        ) {
           const buyDate = new Date(trade.timestamp);
           const sellDate = new Date(trade.sell_timestamp);
           const daysHeld = Math.max(
@@ -34,13 +40,24 @@ export default function Trades() {
             ...trade,
             sell_date: sellDate.toISOString(),
             days_held: daysHeld,
+            __row_id: index,
           };
         }
-        return trade;
+        return { ...trade, __row_id: index };
       });
 
       setTrades(enhancedTrades);
       setSummary(data.summary || null);
+
+      // Identify top gainer and loser
+      if (enhancedTrades.length > 0) {
+        const sorted = [...enhancedTrades]
+          .filter((t) => typeof t.profit_pct === "number")
+          .sort((a, b) => b.profit_pct - a.profit_pct);
+
+        setTopGainerId(sorted[0]?.__row_id ?? null);
+        setTopLoserId(sorted[sorted.length - 1]?.__row_id ?? null);
+      }
     } catch (err) {
       console.error("Failed to fetch trades:", err);
     } finally {
@@ -75,7 +92,9 @@ export default function Trades() {
       {
         accessorKey: "sell_or_current_price",
         header: () => (
-          <SortableHeader label={status === "open" ? "Current Price" : "Sell Price"} />
+          <SortableHeader
+            label={status === "open" ? "Current Price" : "Sell Price"}
+          />
         ),
         cell: (info) => `₹${(+info.getValue()).toFixed(2)}`,
         enableColumnFilter: true,
@@ -170,6 +189,17 @@ export default function Trades() {
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    initialState:
+      status === "closed"
+        ? {
+            sorting: [
+              {
+                id: "sell_date",
+                desc: true,
+              },
+            ],
+          }
+        : {},
   });
 
   return (
@@ -209,35 +239,38 @@ export default function Trades() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white p-4 rounded-xl shadow">
-        {["total_invested", "current_value", "profit", "profit_pct"].map((key) => (
-          <div
-            key={key}
-            className="text-center min-h-[48px] flex flex-col justify-center"
-          >
-            <p className="text-gray-500 text-sm capitalize">
-              {key.replace(/_/g, " ")}
-            </p>
-            <p
-              className={`text-lg font-bold ${
-                key.includes("profit")
-                  ? summary?.[key] >= 0
-                    ? "text-green-600"
-                    : "text-red-600"
-                  : "text-blue-800"
-              }`}
+        {["total_invested", "current_value", "profit", "profit_pct"].map((key) => {
+          const isProfit = key.includes("profit");
+          const value = summary?.[key];
+          const isPositive = value >= 0;
+          const colorClass =
+            isProfit && typeof value === "number"
+              ? isPositive
+                ? "text-green-600"
+                : "text-red-600"
+              : "text-blue-800";
+          return (
+            <div
+              key={key}
+              className="text-center min-h-[48px] flex flex-col justify-center"
             >
-              {loading ? (
-                <LoadingDots />
-              ) : typeof summary?.[key] === "number" ? (
-                key.includes("pct")
-                  ? `${summary[key].toFixed(2)}%`
-                  : `₹${summary[key].toFixed(2)}`
-              ) : (
-                "-"
-              )}
-            </p>
-          </div>
-        ))}
+              <p className="text-gray-500 text-sm capitalize">
+                {key.replace(/_/g, " ")}
+              </p>
+              <p className={`text-lg font-bold ${colorClass}`}>
+                {loading ? (
+                  <LoadingDots />
+                ) : typeof value === "number" ? (
+                  key.includes("pct")
+                    ? `${value.toFixed(2)}%`
+                    : `₹${value.toFixed(2)}`
+                ) : (
+                  "-"
+                )}
+              </p>
+            </div>
+          );
+        })}
       </div>
 
       {/* Extra Metrics */}
@@ -313,15 +346,25 @@ export default function Trades() {
               ))}
             </thead>
             <tbody>
-              {table.getRowModel().rows.map((row) => (
-                <tr key={row.id} className="hover:bg-gray-50 even:bg-gray-50">
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="p-2 border text-left">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                </tr>
-              ))}
+              {table.getRowModel().rows.map((row) => {
+                const rowId = row.original?.__row_id;
+                const isTopGainer = rowId === topGainerId;
+                const isTopLoser = rowId === topLoserId;
+                const bgClass = isTopGainer
+                  ? "bg-green-50"
+                  : isTopLoser
+                  ? "bg-red-50"
+                  : "";
+                return (
+                  <tr key={row.id} className={`hover:bg-gray-50 ${bgClass}`}>
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="p-2 border text-left">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -338,7 +381,9 @@ function MetricCard({ title, value, loading }) {
   return (
     <div className="text-center min-h-[48px] flex flex-col justify-center">
       <p className="text-gray-500 text-sm">{title}</p>
-      <p className="text-lg font-bold">{loading ? <LoadingDots /> : value}</p>
+      <p className="text-lg font-bold text-blue-800">
+        {loading ? <LoadingDots /> : value}
+      </p>
     </div>
   );
 }
