@@ -7,7 +7,6 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import { Loader2 } from "lucide-react";
-import matchSorter from "match-sorter";
 
 export default function Trades() {
   const [trades, setTrades] = useState([]);
@@ -24,9 +23,9 @@ export default function Trades() {
       const data = await res.json();
 
       const enhancedTrades = (data.trades || []).map((trade) => {
-        if (trade.status === "CLOSED" && trade.timestamp && trade.sell_or_current_price) {
+        if (trade.status === "CLOSED" && trade.timestamp && trade.sell_timestamp) {
           const buyDate = new Date(trade.timestamp);
-          const sellDate = new Date(trade.sell_timestamp || trade.timestamp);
+          const sellDate = new Date(trade.sell_timestamp);
           const daysHeld = Math.max(
             1,
             Math.floor((sellDate - buyDate) / (1000 * 60 * 60 * 24))
@@ -136,13 +135,13 @@ export default function Trades() {
             info.getValue()
               ? new Date(info.getValue()).toLocaleDateString()
               : "-",
-          enableColumnFilter: false,
+          enableColumnFilter: true,
         },
         {
           accessorKey: "days_held",
           header: () => <SortableHeader label="Days Held" />,
           cell: (info) => info.getValue(),
-          enableColumnFilter: false,
+          enableColumnFilter: true,
         },
         {
           accessorKey: "reason",
@@ -211,18 +210,33 @@ export default function Trades() {
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white p-4 rounded-xl shadow">
         {["total_invested", "current_value", "profit", "profit_pct"].map((key) => (
-          <MetricCard
+          <div
             key={key}
-            title={key.replace(/_/g, " ")}
-            value={
-              typeof summary?.[key] === "number"
-                ? key.includes("pct")
+            className="text-center min-h-[48px] flex flex-col justify-center"
+          >
+            <p className="text-gray-500 text-sm capitalize">
+              {key.replace(/_/g, " ")}
+            </p>
+            <p
+              className={`text-lg font-bold ${
+                key.includes("profit")
+                  ? summary?.[key] >= 0
+                    ? "text-green-600"
+                    : "text-red-600"
+                  : "text-blue-800"
+              }`}
+            >
+              {loading ? (
+                <LoadingDots />
+              ) : typeof summary?.[key] === "number" ? (
+                key.includes("pct")
                   ? `${summary[key].toFixed(2)}%`
                   : `₹${summary[key].toFixed(2)}`
-                : "-"
-            }
-            loading={loading}
-          />
+              ) : (
+                "-"
+              )}
+            </p>
+          </div>
         ))}
       </div>
 
@@ -324,9 +338,7 @@ function MetricCard({ title, value, loading }) {
   return (
     <div className="text-center min-h-[48px] flex flex-col justify-center">
       <p className="text-gray-500 text-sm">{title}</p>
-      <p className="text-lg font-bold text-indigo-700">
-        {loading ? <LoadingDots /> : value}
-      </p>
+      <p className="text-lg font-bold">{loading ? <LoadingDots /> : value}</p>
     </div>
   );
 }
