@@ -2,10 +2,19 @@ import React from 'react';
 import PlotlyStockCard from './PlotlyStockCard';
 import { RotateCw } from 'lucide-react';
 
-export default function Screener({ stocks, progress, loading, total, currentTicker, fetchAllStocks }) {
+export default function Screener({
+  stocks,
+  progress,
+  loading,
+  total,
+  currentTicker,
+  fetchAllStocks,
+  isPaused,
+  isStopped
+}) {
   return (
     <>
-      {loading && (
+      {(loading || isPaused) && (
         <div className="text-center space-y-3 animate-fade-in">
           <p className="text-lg font-medium text-gray-700">
             Scanning {currentTicker || 'stocks'}... {progress}%
@@ -22,7 +31,8 @@ export default function Screener({ stocks, progress, loading, total, currentTick
         </div>
       )}
 
-      {!loading && stocks.length === 0 && (
+      {/* ✅ Show message only when: not loading, not paused, not stopped, progress complete */}
+      {!loading && !isPaused && !isStopped && progress === 100 && stocks.length === 0 && (
         <p className="text-center text-red-600 font-semibold text-lg">
           🚫 No stocks found matching criteria.
         </p>
