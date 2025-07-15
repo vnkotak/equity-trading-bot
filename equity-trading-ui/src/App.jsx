@@ -93,10 +93,6 @@ export default function App() {
     setLoading(false);
   };
 
-  const handleRefresh = () => {
-    fetchAllStocks();
-  };
-
   return (
     <div className="min-h-screen bg-slate-50 p-6 space-y-6 relative">
       <h1 className="text-4xl font-extrabold text-center text-indigo-700 drop-shadow-sm">
@@ -162,15 +158,6 @@ export default function App() {
                 ⏹️ Stop
               </button>
             </div>
-          )}
-
-          {stocks.length > 0 && (
-            <button
-              className="bg-gray-700 text-white px-4 py-2 rounded-full shadow hover:bg-gray-800 transition"
-              onClick={handleRefresh}
-            >
-              🔄 Refresh
-            </button>
           )}
         </div>
       )}
