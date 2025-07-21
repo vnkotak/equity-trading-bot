@@ -31,10 +31,10 @@ export default function Screener({
           </div>
 
           <p className="text-sm text-gray-600">
-            Number of stocks matched: {stocks.length} / {total}
+            Matched {stocks.length} stock{stocks.length !== 1 && 's'} out of {total}
           </p>
 
-          {/* Controls BELOW the progress bar */}
+          {/* Controls */}
           <div className="flex gap-4 justify-center mt-4">
             <button
               className={`px-4 py-2 rounded-full font-semibold shadow hover:scale-105 transition
@@ -57,17 +57,22 @@ export default function Screener({
         </div>
       )}
 
-      {/* Message for "No Stocks Found" after stop or full scan */}
+      {/* Message when no stocks matched */}
       {!loading && stocks.length === 0 && (isStopped || progress === 100) && (
         <p className="text-center text-red-600 font-semibold text-lg mt-6">
-          🚫 No stocks found matching criteria.
+          🚫 No stocks found matching criteria out of {total} scanned.
         </p>
       )}
 
-      {/* Render Stock Charts */}
+      {/* Render matched stocks with serial numbers */}
       <div className="space-y-6">
         {stocks.map((stock, idx) => (
-          <PlotlyStockCard key={idx} stock={stock} />
+          <div key={idx} className="relative">
+            <div className="absolute -top-2 -left-2 bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-1 rounded-full shadow">
+              {idx + 1}
+            </div>
+            <PlotlyStockCard stock={stock} />
+          </div>
         ))}
       </div>
 
