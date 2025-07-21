@@ -14,7 +14,6 @@ export default function Screener({
   handlePauseToggle,
   handleStop
 }) {
-  // Sort stocks by score descending
   const sortedStocks = [...stocks].sort((a, b) => (b.score || 0) - (a.score || 0));
 
   return (
@@ -77,7 +76,7 @@ export default function Screener({
             </div>
 
             {/* Score Badge (Top Right) */}
-            <div className="absolute -top-3 -right-3 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-semibold shadow">
+            <div className="absolute -top-3 -right-3 bg-blue-50 text-blue-600 text-xs font-semibold px-3 py-[2px] rounded-full border border-blue-200 shadow-sm">
               Score: {stock.score || 0}
             </div>
 
