@@ -14,9 +14,12 @@ export default function Screener({
   handlePauseToggle,
   handleStop
 }) {
+  // Sort stocks by score descending (highest score first)
+  const sortedStocks = [...stocks].sort((a, b) => (b.score || 0) - (a.score || 0));
+
   return (
     <>
-      {/* Progress section */}
+      {/* Progress Section */}
       {(loading || isPaused) && !isStopped && (
         <div className="text-center space-y-4 animate-fade-in">
           <p className="text-lg font-medium text-gray-700">
@@ -31,10 +34,9 @@ export default function Screener({
           </div>
 
           <p className="text-sm text-gray-600">
-            Matched {stocks.length} stock{stocks.length !== 1 && 's'} out of {total}
+            Number of stocks matched: {stocks.length} / {total}
           </p>
 
-          {/* Controls */}
           <div className="flex gap-4 justify-center mt-4">
             <button
               className={`px-4 py-2 rounded-full font-semibold shadow hover:scale-105 transition
@@ -57,20 +59,23 @@ export default function Screener({
         </div>
       )}
 
-      {/* Message when no stocks matched */}
+      {/* No Match Message */}
       {!loading && stocks.length === 0 && (isStopped || progress === 100) && (
         <p className="text-center text-red-600 font-semibold text-lg mt-6">
           🚫 No stocks found matching criteria out of {total} scanned.
         </p>
       )}
 
-      {/* Render matched stocks with serial numbers */}
+      {/* Stock Cards with Score Bubble */}
       <div className="space-y-6">
-        {stocks.map((stock, idx) => (
+        {sortedStocks.map((stock, idx) => (
           <div key={idx} className="relative">
-            <div className="absolute -top-2 -left-2 bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-1 rounded-full shadow">
-              {idx + 1}
+            {/* Score Badge */}
+            <div className="absolute -top-3 -left-3 bg-indigo-600 text-white px-2 py-1 text-xs font-bold rounded shadow-lg z-10">
+              ⭐ Score: {stock.score || 0}
             </div>
+
+            {/* Chart Card */}
             <PlotlyStockCard stock={stock} />
           </div>
         ))}
