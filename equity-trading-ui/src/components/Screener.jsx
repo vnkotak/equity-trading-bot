@@ -14,7 +14,7 @@ export default function Screener({
   handlePauseToggle,
   handleStop
 }) {
-  // Sort stocks by score descending (highest score first)
+  // Sort stocks by score descending
   const sortedStocks = [...stocks].sort((a, b) => (b.score || 0) - (a.score || 0));
 
   return (
@@ -66,16 +66,21 @@ export default function Screener({
         </p>
       )}
 
-      {/* Stock Cards with Score Bubble */}
+      {/* Stock Cards */}
       <div className="space-y-6">
         {sortedStocks.map((stock, idx) => (
           <div key={idx} className="relative">
-            {/* Score Badge */}
-            <div className="absolute -top-3 -left-3 bg-indigo-600 text-white px-2 py-1 text-xs font-bold rounded shadow-lg z-10">
-              ⭐ Score: {stock.score || 0}
+
+            {/* Number Bubble (Top Left) */}
+            <div className="absolute -top-3 -left-3 bg-indigo-100 text-indigo-800 font-bold w-6 h-6 flex items-center justify-center rounded-full text-xs shadow">
+              {idx + 1}
             </div>
 
-            {/* Chart Card */}
+            {/* Score Badge (Top Right) */}
+            <div className="absolute -top-3 -right-3 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-semibold shadow">
+              Score: {stock.score || 0}
+            </div>
+
             <PlotlyStockCard stock={stock} />
           </div>
         ))}
