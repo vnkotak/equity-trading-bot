@@ -137,28 +137,6 @@ export default function App() {
               </button>
             </div>
           )}
-
-          {(loading || isPaused) && !isStopped && (
-            <div className="flex gap-4 flex-wrap justify-center">
-              <button
-                className={`px-4 py-2 rounded-full font-semibold shadow hover:scale-105 transition
-                  ${isPaused
-                    ? 'bg-sky-500 hover:bg-sky-600 text-white'
-                    : 'bg-amber-400 hover:bg-amber-500 text-black'}
-                `}
-                onClick={handlePauseToggle}
-              >
-                {isPaused ? '▶️ Start' : '⏸️ Pause'}
-              </button>
-
-              <button
-                className="bg-rose-400 hover:bg-rose-500 text-white px-4 py-2 rounded-full shadow hover:scale-105 transition"
-                onClick={handleStop}
-              >
-                ⏹️ Stop
-              </button>
-            </div>
-          )}
         </div>
       )}
 
@@ -173,6 +151,8 @@ export default function App() {
           fetchAllStocks={fetchAllStocks}
           isPaused={isPaused}
           isStopped={isStopped}
+          handlePauseToggle={handlePauseToggle}
+          handleStop={handleStop}
         />
       ) : (
         <Trades />
