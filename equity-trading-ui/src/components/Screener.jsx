@@ -76,8 +76,8 @@ export default function Screener({
             </div>
 
             {/* Score Badge (Top Right) */}
-            <div className="absolute -top-3 -right-3 bg-blue-50 text-blue-600 text-xs font-semibold px-3 py-[2px] rounded-full border border-blue-200 shadow-sm">
-              Score: {stock.score || 0}
+            <div className="absolute -top-3 -right-3 bg-indigo-50 text-indigo-700 text-xs font-semibold px-3 py-[2px] rounded-full border border-indigo-500 shadow-sm">
+               Score: {stock.score || 0}
             </div>
 
             <PlotlyStockCard stock={stock} />
