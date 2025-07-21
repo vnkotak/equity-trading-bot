@@ -13,6 +13,7 @@ export default function App() {
 
   const [isPaused, setIsPaused] = useState(false);
   const [isStopped, setIsStopped] = useState(false);
+  const [scanCompleted, setScanCompleted] = useState(false);
 
   const isMounted = useRef(true);
   const pauseRef = useRef(false);
@@ -38,6 +39,7 @@ export default function App() {
     setLoading(true);
     setIsPaused(false);
     setIsStopped(false);
+    setScanCompleted(false);
     pauseRef.current = false;
     stopRef.current = false;
     setStocks([]);
@@ -79,7 +81,10 @@ export default function App() {
     } catch (err) {
       console.error('❌ Error in screener-meta:', err);
     } finally {
-      if (isMounted.current) setLoading(false);
+      if (isMounted.current) {
+        setLoading(false);
+        setScanCompleted(true);
+      }
     }
   };
 
@@ -127,7 +132,7 @@ export default function App() {
       {/* Screener Controls */}
       {view === 'screener' && (
         <div className="flex flex-col items-center gap-6 mt-6">
-          {!loading && !isPaused && !stocks.length && !isStopped && (
+          {!loading && !isPaused && !isStopped && !scanCompleted && !stocks.length && (
             <div className="flex justify-center items-center min-h-[60vh] w-full">
               <button
                 className="bg-indigo-600 text-white px-6 py-4 text-lg font-bold rounded-2xl shadow-md hover:bg-indigo-700 transition"
