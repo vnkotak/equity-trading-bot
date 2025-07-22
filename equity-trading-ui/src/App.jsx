@@ -141,14 +141,17 @@ export default function App() {
     setIsStopped(true);
     stopRef.current = true;
     setLoading(false);
-  };
+ ? };
 
   return (
     <div className="min-h-screen bg-slate-50 p-6 space-y-6 relative">
-      <h1 className="text-4xl font-extrabold text-center text-indigo-700 drop-shadow-sm">
-        📈 NSE Equity Dashboard
-      </h1>
-
+<div className="flex justify-center">
+  <img
+    src="/logo.png"
+    alt="TradPulse Logo"
+    className="h-16 md:h-20 w-auto mt-2 mb-4"
+  />
+</div>
       {/* Toggle Tabs */}
       <div className="relative w-full max-w-xs mx-auto mt-4">
         <div className="grid grid-cols-2 bg-gray-200 rounded-full shadow-inner p-1 relative">
