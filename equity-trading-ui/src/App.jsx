@@ -43,12 +43,12 @@ export default function App() {
       const res = await fetch("https://fastapi-trading-bot-1.onrender.com/screener-latest");
       const data = await res.json();
 
-      if (Array.isArray(data.stocks)) {
-        setTotal(data.stocks.length);
+      if (Array.isArray(data.tickers)) {
+        setTotal(data.tickers.length);
         setRefreshedAt(data.refreshed_at || '');
         setScanCompleted(true);
 
-        for (let ticker of data.stocks) {
+        for (let ticker of data.tickers) {
           const res = await fetch(`https://fastapi-trading-bot-1.onrender.com/screener-stock?ticker=${ticker}`);
           const stock = await res.json();
 
