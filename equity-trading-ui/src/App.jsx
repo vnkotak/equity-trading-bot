@@ -83,6 +83,7 @@ export default function App() {
     setIsPaused(false);
     setIsStopped(false);
     setScanCompleted(false);
+    setLastRefreshedAt(new Date().toISOString()); 
     pauseRef.current = false;
     stopRef.current = false;
     setStocks([]);
