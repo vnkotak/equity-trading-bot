@@ -167,8 +167,8 @@ export default function App() {
 
       {/* Last Refreshed Timestamp */}
       {view === 'screener' && lastRefreshedAt && (
-        <div className="flex justify-end max-w-5xl mx-auto pr-2 animate-fade-in">
-          <p className="text-sm text-gray-500 italic">
+        <div className="max-w-screen-xl mx-auto px-4 sm:px-6">
+          <p className="text-right text-xs sm:text-sm text-gray-500 italic animate-fade-in">
             Last refreshed at: {new Date(lastRefreshedAt).toLocaleString()}
           </p>
         </div>
