@@ -46,6 +46,12 @@ export default function App() {
       setLastRefreshedAt(data.refreshed_at || '');
 
       for (let i = 0; i < tickers.length; i++) {
+       if (!isMounted.current || stopRef.current) break;
+
+        while (pauseRef.current) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+          if (stopRef.current) break;
+        }
         const ticker = tickers[i];
         setCurrentTicker(ticker);
         try {
