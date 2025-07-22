@@ -10,7 +10,8 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
   const [currentTicker, setCurrentTicker] = useState('');
-  const [refreshedAt, setRefreshedAt] = useState('');
+  const [lastRefreshedAt, setLastRefreshedAt] = useState(null);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   const [isPaused, setIsPaused] = useState(false);
   const [isStopped, setIsStopped] = useState(false);
@@ -34,36 +35,37 @@ export default function App() {
     stopRef.current = isStopped;
   }, [isStopped]);
 
+  // Load initial stocks from /screener-latest
   useEffect(() => {
-    loadLatestScannedStocks();
-  }, []);
+    const loadInitialScreened = async () => {
+      try {
+        const res = await fetch('https://fastapi-trading-bot-1.onrender.com/screener-latest');
+        const data = await res.json();
 
-  const loadLatestScannedStocks = async () => {
-    try {
-      const res = await fetch("https://fastapi-trading-bot-1.onrender.com/screener-latest");
-      const data = await res.json();
+        const tickers = Array.isArray(data.tickers) ? data.tickers : [];
+        setLastRefreshedAt(data.refreshed_at || null);
+        setTotal(tickers.length);
 
-      if (Array.isArray(data.tickers)) {
-        setTotal(data.tickers.length);
-        setRefreshedAt(data.refreshed_at || '');
-        setScanCompleted(true);
-
-        for (let ticker of data.tickers) {
+        let loadedCount = 0;
+        for (let ticker of tickers) {
           const res = await fetch(`https://fastapi-trading-bot-1.onrender.com/screener-stock?ticker=${ticker}`);
-          const stock = await res.json();
-
-          if (stock && stock.history && stock.history.length > 0) {
-            setStocks((prev) => {
-              if (prev.find((s) => s.ticker === stock.ticker)) return prev;
-              return [...prev, stock];
-            });
+          const data = await res.json();
+          if (data && data.history && data.history.length > 0) {
+            setStocks(prev => [...prev, data]);
           }
+          loadedCount++;
+          setProgress(Math.round((loadedCount / tickers.length) * 100));
         }
+      } catch (err) {
+        console.error('❌ Error in screener-latest:', err);
+      } finally {
+        setIsInitialLoading(false);
+        setProgress(0); // clear progress bar after initial load
       }
-    } catch (error) {
-      console.error("Error loading latest screener data:", error);
-    }
-  };
+    };
+
+    loadInitialScreened();
+  }, []);
 
   const fetchAllStocks = async () => {
     setProgress(0);
@@ -75,7 +77,6 @@ export default function App() {
     pauseRef.current = false;
     stopRef.current = false;
     setStocks([]);
-    setRefreshedAt('');
 
     try {
       const metaRes = await fetch('https://fastapi-trading-bot-1.onrender.com/screener-meta');
@@ -131,19 +132,24 @@ export default function App() {
     setLoading(false);
   };
 
-  const formattedRefreshedAt = refreshedAt
-    ? new Date(refreshedAt).toLocaleString('en-IN', {
-        timeZone: 'Asia/Kolkata',
-        dateStyle: 'medium',
-        timeStyle: 'short'
-      })
-    : null;
+  const formatTime = (iso) => {
+    const date = new Date(iso);
+    return date.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 p-6 space-y-6 relative">
-      <h1 className="text-4xl font-extrabold text-center text-indigo-700 drop-shadow-sm">
-        📈 NSE Equity Dashboard
-      </h1>
+      {/* Top Header */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-4xl font-extrabold text-indigo-700 drop-shadow-sm">
+          📈 NSE Equity Dashboard
+        </h1>
+        {lastRefreshedAt && (
+          <span className="text-xs text-gray-500">
+            Last refreshed: {formatTime(lastRefreshedAt)}
+          </span>
+        )}
+      </div>
 
       {/* Toggle Tabs */}
       <div className="relative w-full max-w-xs mx-auto mt-4">
@@ -170,10 +176,10 @@ export default function App() {
         </div>
       </div>
 
-      {/* Screener Controls + Last Refreshed */}
+      {/* Screener Controls */}
       {view === 'screener' && (
-        <div className="flex flex-col items-center gap-4 mt-6">
-          {!loading && !isPaused && !isStopped && !scanCompleted && !stocks.length && (
+        <div className="flex flex-col items-center gap-6 mt-6">
+          {!loading && !isPaused && !isStopped && !scanCompleted && !stocks.length && !isInitialLoading && (
             <div className="flex justify-center items-center min-h-[60vh] w-full">
               <button
                 className="bg-indigo-600 text-white px-6 py-4 text-lg font-bold rounded-2xl shadow-md hover:bg-indigo-700 transition"
@@ -183,12 +189,21 @@ export default function App() {
               </button>
             </div>
           )}
+        </div>
+      )}
 
-          {formattedRefreshedAt && (
-            <div className="text-center text-sm text-gray-600">
-              🕒 <span className="font-medium">Last refreshed at: {formattedRefreshedAt}</span>
-            </div>
-          )}
+      {/* Progress bar during initial load */}
+      {isInitialLoading && (
+        <div className="w-full max-w-xl mx-auto mt-4">
+          <p className="text-center text-sm text-gray-500 mb-2">
+            Loading saved screen results...
+          </p>
+          <div className="w-full bg-gray-300 rounded-full h-3 overflow-hidden">
+            <div
+              className="bg-indigo-500 h-3 rounded-full transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
         </div>
       )}
 
