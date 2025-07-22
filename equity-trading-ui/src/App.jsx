@@ -20,7 +20,7 @@ export default function App() {
 
   useEffect(() => {
     isMounted.current = true;
-    fetchLatestBatch(); // Load initially
+    fetchLatestBatch(); // Load initially 
     return () => {
       isMounted.current = false;
     };
