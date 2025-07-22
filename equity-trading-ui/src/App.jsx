@@ -141,7 +141,7 @@ export default function App() {
     setIsStopped(true);
     stopRef.current = true;
     setLoading(false);
- ? };
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 p-6 space-y-6 relative">
