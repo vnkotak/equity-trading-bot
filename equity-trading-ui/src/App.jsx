@@ -10,9 +10,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
   const [currentTicker, setCurrentTicker] = useState('');
-  const [lastRefreshedAt, setLastRefreshedAt] = useState(null);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
-
+  const [lastRefreshedAt, setLastRefreshedAt] = useState('');
   const [isPaused, setIsPaused] = useState(false);
   const [isStopped, setIsStopped] = useState(false);
   const [scanCompleted, setScanCompleted] = useState(false);
@@ -22,6 +20,8 @@ export default function App() {
   const stopRef = useRef(false);
 
   useEffect(() => {
+    isMounted.current = true;
+    fetchLatestBatch(); // Load initially
     return () => {
       isMounted.current = false;
     };
@@ -35,37 +35,40 @@ export default function App() {
     stopRef.current = isStopped;
   }, [isStopped]);
 
-  // Load initial stocks from /screener-latest
-  useEffect(() => {
-    const loadInitialScreened = async () => {
-      try {
-        const res = await fetch('https://fastapi-trading-bot-1.onrender.com/screener-latest');
-        const data = await res.json();
+  const fetchLatestBatch = async () => {
+    setLoading(true);
+    setStocks([]);
+    try {
+      const res = await fetch('https://fastapi-trading-bot-1.onrender.com/screener-latest');
+      const data = await res.json();
+      const tickers = Array.isArray(data.tickers) ? data.tickers : [];
+      setTotal(tickers.length);
+      setLastRefreshedAt(data.refreshed_at || '');
 
-        const tickers = Array.isArray(data.tickers) ? data.tickers : [];
-        setLastRefreshedAt(data.refreshed_at || null);
-        setTotal(tickers.length);
-
-        let loadedCount = 0;
-        for (let ticker of tickers) {
+      for (let i = 0; i < tickers.length; i++) {
+        const ticker = tickers[i];
+        setCurrentTicker(ticker);
+        try {
           const res = await fetch(`https://fastapi-trading-bot-1.onrender.com/screener-stock?ticker=${ticker}`);
-          const data = await res.json();
-          if (data && data.history && data.history.length > 0) {
-            setStocks(prev => [...prev, data]);
+          const stockData = await res.json();
+          if (stockData && stockData.history && stockData.history.length > 0) {
+            setStocks((prev) => {
+              if (prev.find((s) => s.ticker === stockData.ticker)) return prev;
+              return [...prev, stockData];
+            });
           }
-          loadedCount++;
-          setProgress(Math.round((loadedCount / tickers.length) * 100));
+        } catch (err) {
+          console.warn(`❌ Error fetching ${ticker}:`, err);
         }
-      } catch (err) {
-        console.error('❌ Error in screener-latest:', err);
-      } finally {
-        setIsInitialLoading(false);
-        setProgress(0); // clear progress bar after initial load
+        setProgress(Math.round(((i + 1) / tickers.length) * 100));
       }
-    };
-
-    loadInitialScreened();
-  }, []);
+    } catch (err) {
+      console.error("❌ Error fetching screener-latest:", err);
+    } finally {
+      setLoading(false);
+      setScanCompleted(true);
+    }
+  };
 
   const fetchAllStocks = async () => {
     setProgress(0);
@@ -82,7 +85,6 @@ export default function App() {
       const metaRes = await fetch('https://fastapi-trading-bot-1.onrender.com/screener-meta');
       const metaData = await metaRes.json();
       const tickers = Array.isArray(metaData) ? metaData : metaData.tickers || [];
-
       setTotal(tickers.length);
 
       for (let i = 0; i < tickers.length; i++) {
@@ -132,24 +134,11 @@ export default function App() {
     setLoading(false);
   };
 
-  const formatTime = (iso) => {
-    const date = new Date(iso);
-    return date.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-  };
-
   return (
     <div className="min-h-screen bg-slate-50 p-6 space-y-6 relative">
-      {/* Top Header */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-4xl font-extrabold text-indigo-700 drop-shadow-sm">
-          📈 NSE Equity Dashboard
-        </h1>
-        {lastRefreshedAt && (
-          <span className="text-xs text-gray-500">
-            Last refreshed: {formatTime(lastRefreshedAt)}
-          </span>
-        )}
-      </div>
+      <h1 className="text-4xl font-extrabold text-center text-indigo-700 drop-shadow-sm">
+        📈 NSE Equity Dashboard
+      </h1>
 
       {/* Toggle Tabs */}
       <div className="relative w-full max-w-xs mx-auto mt-4">
@@ -176,10 +165,19 @@ export default function App() {
         </div>
       </div>
 
+      {/* Last Refreshed Timestamp */}
+      {view === 'screener' && lastRefreshedAt && (
+        <div className="flex justify-end max-w-5xl mx-auto pr-2 animate-fade-in">
+          <p className="text-sm text-gray-500 italic">
+            Last refreshed at: {new Date(lastRefreshedAt).toLocaleString()}
+          </p>
+        </div>
+      )}
+
       {/* Screener Controls */}
       {view === 'screener' && (
-        <div className="flex flex-col items-center gap-6 mt-6">
-          {!loading && !isPaused && !isStopped && !scanCompleted && !stocks.length && !isInitialLoading && (
+        <div className="flex flex-col items-center gap-6 mt-4">
+          {!loading && !isPaused && !isStopped && !scanCompleted && !stocks.length && (
             <div className="flex justify-center items-center min-h-[60vh] w-full">
               <button
                 className="bg-indigo-600 text-white px-6 py-4 text-lg font-bold rounded-2xl shadow-md hover:bg-indigo-700 transition"
@@ -189,21 +187,6 @@ export default function App() {
               </button>
             </div>
           )}
-        </div>
-      )}
-
-      {/* Progress bar during initial load */}
-      {isInitialLoading && (
-        <div className="w-full max-w-xl mx-auto mt-4">
-          <p className="text-center text-sm text-gray-500 mb-2">
-            Loading saved screen results...
-          </p>
-          <div className="w-full bg-gray-300 rounded-full h-3 overflow-hidden">
-            <div
-              className="bg-indigo-500 h-3 rounded-full transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
         </div>
       )}
 
