@@ -10,6 +10,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
   const [currentTicker, setCurrentTicker] = useState('');
+  const [refreshedAt, setRefreshedAt] = useState('');
 
   const [isPaused, setIsPaused] = useState(false);
   const [isStopped, setIsStopped] = useState(false);
@@ -33,6 +34,37 @@ export default function App() {
     stopRef.current = isStopped;
   }, [isStopped]);
 
+  useEffect(() => {
+    loadLatestScannedStocks();
+  }, []);
+
+  const loadLatestScannedStocks = async () => {
+    try {
+      const res = await fetch("https://fastapi-trading-bot-1.onrender.com/screener-latest");
+      const data = await res.json();
+
+      if (Array.isArray(data.stocks)) {
+        setTotal(data.stocks.length);
+        setRefreshedAt(data.refreshed_at || '');
+        setScanCompleted(true);
+
+        for (let ticker of data.stocks) {
+          const res = await fetch(`https://fastapi-trading-bot-1.onrender.com/screener-stock?ticker=${ticker}`);
+          const stock = await res.json();
+
+          if (stock && stock.history && stock.history.length > 0) {
+            setStocks((prev) => {
+              if (prev.find((s) => s.ticker === stock.ticker)) return prev;
+              return [...prev, stock];
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error loading latest screener data:", error);
+    }
+  };
+
   const fetchAllStocks = async () => {
     setProgress(0);
     setCurrentTicker('');
@@ -43,6 +75,7 @@ export default function App() {
     pauseRef.current = false;
     stopRef.current = false;
     setStocks([]);
+    setRefreshedAt('');
 
     try {
       const metaRes = await fetch('https://fastapi-trading-bot-1.onrender.com/screener-meta');
@@ -98,6 +131,14 @@ export default function App() {
     setLoading(false);
   };
 
+  const formattedRefreshedAt = refreshedAt
+    ? new Date(refreshedAt).toLocaleString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        dateStyle: 'medium',
+        timeStyle: 'short'
+      })
+    : null;
+
   return (
     <div className="min-h-screen bg-slate-50 p-6 space-y-6 relative">
       <h1 className="text-4xl font-extrabold text-center text-indigo-700 drop-shadow-sm">
@@ -129,9 +170,9 @@ export default function App() {
         </div>
       </div>
 
-      {/* Screener Controls */}
+      {/* Screener Controls + Last Refreshed */}
       {view === 'screener' && (
-        <div className="flex flex-col items-center gap-6 mt-6">
+        <div className="flex flex-col items-center gap-4 mt-6">
           {!loading && !isPaused && !isStopped && !scanCompleted && !stocks.length && (
             <div className="flex justify-center items-center min-h-[60vh] w-full">
               <button
@@ -140,6 +181,12 @@ export default function App() {
               >
                 🚀 Screen Stocks
               </button>
+            </div>
+          )}
+
+          {formattedRefreshedAt && (
+            <div className="text-center text-sm text-gray-600">
+              🕒 <span className="font-medium">Last refreshed at: {formattedRefreshedAt}</span>
             </div>
           )}
         </div>
