@@ -174,10 +174,10 @@ export default function App() {
         </div>
       </div>
 
-      {/* Last Refreshed Timestamp */}
-      {view === 'screener' && lastRefreshedAt && (
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6">
-          <p className="text-right text-xs sm:text-sm text-gray-500 italic animate-fade-in">
+        {/* Last Refreshed Timestamp — aligned right */}
+        {view === 'screener' && lastRefreshedAt && (
+          <div className="text-right mt-1 pr-1">
+            <p className="text-[10px] sm:text-xs text-gray-500 italic animate-fade-in">
             Last refreshed at: {new Date(lastRefreshedAt).toLocaleString('en-IN', {
               day: '2-digit',
               month: '2-digit',
