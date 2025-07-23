@@ -147,10 +147,10 @@ export default function App() {
     <div className="min-h-screen bg-slate-50 p-6 space-y-6 relative">
 <div className="flex justify-center mt-2 mb-4">
   <img
-    src="/logo.png"  // or your actual path
-    alt="TradPulse Logo"
-    className="h-28 sm:h-36 w-auto max-w-xs sm:max-w-sm object-contain"
-  />
+  src="/logo.png"
+  alt="TradPulse Logo"
+  className="h-20 sm:h-24 object-contain mx-auto"
+ />
 </div>
       {/* Toggle Tabs */}
       <div className="relative w-full max-w-xs mx-auto mt-4">
